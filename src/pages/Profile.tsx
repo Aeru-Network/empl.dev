@@ -456,7 +456,7 @@ const TimelineContent: React.FC<{ profile: typeof defaultProfile }> = ({ profile
   <div style={{ position: 'relative' }}>
     <div style={{
       position: 'absolute',
-      left: 7,
+      left: 4,
       top: 8,
       bottom: 8,
       width: 2,
@@ -468,14 +468,13 @@ const TimelineContent: React.FC<{ profile: typeof defaultProfile }> = ({ profile
         <div key={exp.id} style={{ display: 'flex', gap: '16px', paddingLeft: 4 }}>
           <div style={{ flexShrink: 0, marginTop: 5 }}>
             <div style={{
-              width: 16,
-              height: 16,
+              width: 10,
+              height: 10,
               borderRadius: '50%',
               backgroundColor: exp.type === 'work' ? tokens.colors.primary : tokens.colors.accent,
-              border: `2.5px solid ${tokens.colors.surface}`,
-              boxShadow: `0 0 0 2px ${exp.type === 'work' ? tokens.colors.primary : tokens.colors.accent}`,
               position: 'relative',
               zIndex: 1,
+              marginTop: 3,
             }} />
           </div>
           <div style={{ flex: 1, paddingBottom: 4 }}>
