@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { tokens } from '../tokens';
-import { GithubIcon } from '../components/Icons';
 
 type Page =
   | 'landing' | 'profile' | 'explore' | 'jobs' | 'login' | 'mypage'
@@ -11,105 +10,132 @@ interface LoginProps {
   onLogin: () => void;
 }
 
-const D = {
-  bg: '#000', card: '#0f0f0f', input: '#111',
-  border: 'rgba(255,255,255,0.08)', inputBorder: 'rgba(255,255,255,0.10)',
-  borderFocus: 'rgba(255,255,255,0.28)', heading: '#fff', body: '#a1a1aa', muted: '#52525b',
-};
-
 const Login: React.FC<LoginProps> = ({ onNavigate, onLogin }) => {
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%', padding: '10px 12px', border: `1px solid ${D.inputBorder}`,
-    borderRadius: 8, fontSize: tokens.fontSizes.sm, color: D.heading,
-    outline: 'none', boxSizing: 'border-box', background: D.input,
-    fontFamily: 'inherit', transition: `border-color ${tokens.transitions.fast}`,
+  const handleSSO = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      onLogin();
+    }, 900);
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: D.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-      <div style={{ background: D.card, borderRadius: 14, border: `1px solid ${D.border}`, width: '100%', maxWidth: 400, padding: '36px 32px' }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <h1 style={{ fontSize: tokens.fontSizes.xl, fontWeight: 800, color: D.heading, margin: '0 0 6px', letterSpacing: '-0.5px' }}>
-            empl<span style={{ color: '#52525b' }}>.dev</span>
-          </h1>
-          <p style={{ fontSize: tokens.fontSizes.sm, color: D.muted, marginTop: 4 }}>
-            {mode === 'login' ? '계정에 로그인하세요' : '새 계정을 만드세요'}
+    <div style={{
+      minHeight: '100vh', background: '#000',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center', padding: '20px',
+    }}>
+      {/* Wordmark */}
+      <div style={{ textAlign: 'center', marginBottom: 32 }}>
+        <span style={{ fontWeight: 800, fontSize: 26, color: '#ffffff', letterSpacing: '-1px' }}>
+          empl<span style={{ color: '#a1a1aa', fontWeight: 700 }}>.dev</span>
+        </span>
+      </div>
+
+      {/* Card */}
+      <div style={{
+        background: '#0D0D14', border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: 18, padding: '32px 32px 28px', width: '100%', maxWidth: 380,
+        animation: 'fadeUp 0.35s ease both',
+      }}>
+        <div style={{ marginBottom: 28 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
+            계정 로그인
+          </h2>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.55 }}>
+            empl SSO 계정으로 계속합니다
           </p>
         </div>
 
-        {/* Tab */}
-        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '3px', marginBottom: 24, border: `1px solid ${D.border}` }}>
-          {(['login', 'signup'] as const).map(m => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              style={{
-                flex: 1, padding: '7px', border: 'none', borderRadius: 6,
-                fontSize: tokens.fontSizes.sm, fontWeight: 600, cursor: 'pointer',
-                background: mode === m ? '#1a1a1a' : 'transparent',
-                color: mode === m ? D.heading : D.muted,
-                transition: `all ${tokens.transitions.fast}`,
-              }}
-            >
-              {m === 'login' ? '로그인' : '회원가입'}
-            </button>
-          ))}
-        </div>
+        <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 28 }} />
 
-        {/* GitHub OAuth */}
         <button
-          onClick={onLogin}
+          onClick={handleSSO}
+          disabled={loading}
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-            width: '100%', padding: '11px', background: '#fff', color: '#000',
-            border: 'none', borderRadius: 8, fontSize: tokens.fontSizes.sm, fontWeight: 700, cursor: 'pointer', marginBottom: 20,
+            width: '100%', padding: '14px', borderRadius: 12,
+            background: loading ? 'rgba(61,123,255,0.7)' : '#3D7BFF',
+            color: '#fff', border: 'none', fontFamily: 'inherit',
+            fontSize: tokens.fontSizes.sm, fontWeight: 700, cursor: loading ? 'default' : 'pointer',
+            boxShadow: '0 8px 28px -10px rgba(61,123,255,0.65)',
+            transition: 'all 0.18s ease',
+            letterSpacing: '0.1px',
           }}
+          onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = '#5089FF'; }}
+          onMouseLeave={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = '#3D7BFF'; }}
         >
-          <GithubIcon size={18} color="#000" />
-          GitHub으로 계속하기
+          {loading ? (
+            <>
+              <LoadingSpinner />
+              인증 중...
+            </>
+          ) : (
+            <>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 1.5C4.41 1.5 1.5 4.41 1.5 8s2.91 6.5 6.5 6.5S14.5 11.59 14.5 8 11.59 1.5 8 1.5z" stroke="white" strokeWidth="1.3" strokeLinecap="round"/>
+                <path d="M5.5 8h5M8 5.5v5" stroke="white" strokeWidth="1.3" strokeLinecap="round"/>
+              </svg>
+              empl SSO로 계속하기
+            </>
+          )}
         </button>
 
-        {/* Divider */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-          <div style={{ flex: 1, height: 1, background: D.border }} />
-          <span style={{ fontSize: tokens.fontSizes.xs, color: D.muted }}>또는 이메일로</span>
-          <div style={{ flex: 1, height: 1, background: D.border }} />
-        </div>
-
-        {/* Email form */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div>
-            <label style={{ fontSize: tokens.fontSizes.xs, fontWeight: 600, color: D.body, display: 'block', marginBottom: 5 }}>이메일</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.dev" style={inputStyle}
-              onFocus={e => (e.target.style.borderColor = D.borderFocus)} onBlur={e => (e.target.style.borderColor = D.inputBorder)} />
-          </div>
-          <div>
-            <label style={{ fontSize: tokens.fontSizes.xs, fontWeight: 600, color: D.body, display: 'block', marginBottom: 5 }}>비밀번호</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" style={inputStyle}
-              onFocus={e => (e.target.style.borderColor = D.borderFocus)} onBlur={e => (e.target.style.borderColor = D.inputBorder)} />
-          </div>
+        <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.22)', fontSize: 11, marginTop: 20, lineHeight: 1.6 }}>
+          계속하면 empl.dev{' '}
           <button
-            onClick={onLogin}
-            style={{ padding: '11px', background: '#fff', color: '#000', border: 'none', borderRadius: 8, fontSize: tokens.fontSizes.sm, fontWeight: 700, cursor: 'pointer', marginTop: 4 }}
+            onClick={() => {}}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.22)', fontSize: 11, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit', padding: 0 }}
           >
-            {mode === 'login' ? '로그인' : '가입하기'}
+            이용약관
           </button>
-        </div>
-
-        <button
-          onClick={() => onNavigate('landing')}
-          style={{ display: 'block', width: '100%', marginTop: 20, background: 'none', border: 'none', fontSize: tokens.fontSizes.xs, color: D.muted, cursor: 'pointer', textAlign: 'center' }}
-        >
-          메인으로 돌아가기
-        </button>
+          {' '}및{' '}
+          <button
+            onClick={() => {}}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.22)', fontSize: 11, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit', padding: 0 }}
+          >
+            개인정보처리방침
+          </button>
+          에 동의하는 것으로 간주됩니다
+        </p>
       </div>
+
+      <button
+        onClick={() => onNavigate('landing')}
+        style={{ marginTop: 24, background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit', transition: 'color 0.15s' }}
+        onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
+        onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.2)')}
+      >
+        ← 메인으로 돌아가기
+      </button>
+
+      <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.18)', fontSize: 11, marginTop: 28 }}>
+        © 2026 EMPL.DEV
+      </p>
+
+      <style>{`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
+
+const LoadingSpinner: React.FC = () => (
+  <span style={{
+    width: 15, height: 15, borderRadius: '50%',
+    border: '2px solid rgba(255,255,255,0.3)',
+    borderTopColor: '#fff',
+    display: 'inline-block',
+    animation: 'spin 0.7s linear infinite',
+  }} />
+);
 
 export default Login;

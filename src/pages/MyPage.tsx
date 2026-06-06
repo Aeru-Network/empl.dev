@@ -4,11 +4,13 @@ import type { ProfileData, Company } from '../data/defaultData';
 import {
   UserIcon, BuildingIcon, BriefcaseIcon, SettingsIcon, PencilIcon,
   SparklesIcon, PlusIcon, ChevronDownIcon, CodeIcon, HomeIcon,
+  MessageIcon, SearchIcon,
 } from '../components/Icons';
 
 type Page =
   | 'landing' | 'profile' | 'explore' | 'jobs' | 'login' | 'mypage'
-  | 'postDetail' | 'settings' | 'onboarding' | 'companies' | 'company' | 'companyManage';
+  | 'postDetail' | 'settings' | 'onboarding' | 'companies' | 'company' | 'companyManage'
+  | 'messages';
 
 interface MyPageProps {
   profile: ProfileData | null;
@@ -60,11 +62,22 @@ const MyPage: React.FC<MyPageProps> = ({ profile, companies, onNavigate, onIniti
   }
 
   const myCompanies = companies.filter(c => c.isManaged);
+  const today = new Date();
+  const greeting = today.getHours() < 12 ? '좋은 아침이에요' : today.getHours() < 18 ? '안녕하세요' : '안녕하세요';
+
+  const stats = [
+    { label: '팔로워', value: profile.followers.toLocaleString(), color: '#5b9cf6' },
+    { label: '팔로잉', value: profile.following.toLocaleString(), color: '#a78bfa' },
+    { label: '포스트', value: String(profile.posts.length), color: '#34d399' },
+    { label: '프로젝트', value: String(profile.projects.length), color: '#fb923c' },
+  ];
 
   const quickActions = [
     { label: '내 프로필', desc: '프로필 보기 및 편집', icon: <UserIcon size={20} color="#5b9cf6" />, color: '#0070f3', onClick: () => onNavigate('profile') },
-    { label: '회사 관리', desc: '기업 페이지 관리', icon: <BuildingIcon size={20} color="#a78bfa" />, color: '#7c3aed', onClick: onManageCompanies },
-    { label: '채용 둘러보기', desc: '맞춤 포지션 탐색', icon: <BriefcaseIcon size={20} color="#34d399" />, color: '#10b981', onClick: () => onNavigate('jobs') },
+    { label: '개발자 탐색', desc: '다른 개발자 찾기', icon: <SearchIcon size={20} color="#34d399" />, color: '#10b981', onClick: () => onNavigate('explore') },
+    { label: '채용 둘러보기', desc: '맞춤 포지션 탐색', icon: <BriefcaseIcon size={20} color="#fb923c" />, color: '#f59e0b', onClick: () => onNavigate('jobs') },
+    { label: '메시지', desc: '받은 메시지 확인', icon: <MessageIcon size={20} color="#a78bfa" />, color: '#7c3aed', onClick: () => onNavigate('messages') },
+    { label: '회사 관리', desc: '기업 페이지 관리', icon: <BuildingIcon size={20} color="#38bdf8" />, color: '#0ea5e9', onClick: onManageCompanies },
     { label: '설정', desc: '계정 및 프로필 설정', icon: <SettingsIcon size={20} color={D.body} />, color: '#52525b', onClick: () => onNavigate('settings') },
   ];
 
@@ -72,11 +85,11 @@ const MyPage: React.FC<MyPageProps> = ({ profile, companies, onNavigate, onIniti
     <div style={{ background: D.bg, minHeight: '100vh', padding: '32px 20px 60px' }}>
       <div style={{ maxWidth: 820, margin: '0 auto' }}>
         {/* Greeting header */}
-        <div style={{ background: D.card, borderRadius: 12, border: `1px solid ${D.border}`, padding: '22px 24px', marginBottom: 16, display: 'flex', gap: 16, alignItems: 'center' }}>
+        <div style={{ background: D.card, borderRadius: 12, border: `1px solid ${D.border}`, padding: '22px 24px', marginBottom: 14, display: 'flex', gap: 16, alignItems: 'center' }}>
           <Avatar profile={profile} size={58} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={{ fontSize: tokens.fontSizes.xl, fontWeight: 800, color: D.heading, margin: '0 0 4px', letterSpacing: '-0.3px' }}>
-              안녕하세요, {profile.name}님
+              {greeting}, {profile.name}님 👋
             </h1>
             <p style={{ fontSize: tokens.fontSizes.sm, color: D.body, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {profile.headline || '오늘도 좋은 하루 되세요!'}
@@ -88,6 +101,16 @@ const MyPage: React.FC<MyPageProps> = ({ profile, companies, onNavigate, onIniti
           >
             <PencilIcon size={13} color={D.body} /> 편집
           </button>
+        </div>
+
+        {/* Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
+          {stats.map(s => (
+            <div key={s.label} style={{ background: D.card, borderRadius: 10, border: `1px solid ${D.border}`, padding: '16px 18px', textAlign: 'center' }}>
+              <div style={{ fontSize: 22, fontWeight: 800, color: s.color, letterSpacing: '-0.5px', marginBottom: 2 }}>{s.value}</div>
+              <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted }}>{s.label}</div>
+            </div>
+          ))}
         </div>
 
         {/* Quick actions */}

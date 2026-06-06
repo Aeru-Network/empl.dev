@@ -123,8 +123,11 @@ const App: React.FC = () => {
   };
 
   const handleLogin = () => {
+    if (!profile) {
+      setProfile(JSON.parse(JSON.stringify(defaultProfile)) as ProfileData);
+    }
     setLoggedIn(true);
-    navigate(profile ? 'profile' : 'onboarding');
+    navigate('profile');
   };
 
   const handleLogout = () => {
