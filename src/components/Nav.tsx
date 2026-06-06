@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { tokens } from '../tokens';
-import { ChevronDownIcon, UserIcon, SettingsIcon, LogOutIcon, HomeIcon, BriefcaseIcon } from './Icons';
+import { ChevronDownIcon, UserIcon, SettingsIcon, LogOutIcon, HomeIcon, BriefcaseIcon, MessageIcon } from './Icons';
 import type { ProfileData } from '../data/defaultData';
 
 type Page =
   | 'landing' | 'profile' | 'explore' | 'jobs' | 'login' | 'mypage'
-  | 'postDetail' | 'postEditor' | 'settings' | 'onboarding' | 'companies' | 'company' | 'companyManage';
+  | 'postDetail' | 'postEditor' | 'settings' | 'onboarding' | 'companies' | 'company' | 'companyManage'
+  | 'messages';
 
 interface NavProps {
   currentPage: Page;
@@ -94,10 +95,11 @@ const Nav: React.FC<NavProps> = ({ currentPage, onNavigate, isLoggedIn = true, p
     transition: `all ${tokens.transitions.fast}`, whiteSpace: 'nowrap',
   });
 
-  const centerLinks: { label: string; page: Page }[] = [
+  const centerLinks: { label: string; page: Page; icon?: React.ReactNode }[] = [
     { label: '탐색', page: 'explore' },
     { label: '채용공고', page: 'jobs' },
     { label: '회사', page: 'companies' },
+    { label: '메시지', page: 'messages', icon: <MessageIcon size={14} color="currentColor" /> },
   ];
 
   const dropdownItems: { label: string; page: Page; icon: React.ReactNode }[] = [
@@ -130,11 +132,12 @@ const Nav: React.FC<NavProps> = ({ currentPage, onNavigate, isLoggedIn = true, p
               return (
                 <button
                   key={link.page}
-                  style={navLinkStyle(active)}
+                  style={{ ...navLinkStyle(active), display: 'flex', alignItems: 'center', gap: 5 }}
                   onClick={() => onNavigate(link.page)}
                   onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.backgroundColor = D.hoverBg; }}
                   onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent'; }}
                 >
+                  {link.icon}
                   {link.label}
                 </button>
               );

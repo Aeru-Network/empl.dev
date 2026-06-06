@@ -207,3 +207,15 @@ export const CheckCircleIcon: React.FC<IconProps> = ({ size = 16, color = 'curre
     <polyline points="22 4 12 14.01 9 11.01"/>
   </svg>
 );
+
+export const MessageIcon: React.FC<IconProps> = ({ size = 16, color = 'currentColor', style }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+);
+
+export const SendIcon: React.FC<IconProps> = ({ size = 16, color = 'currentColor', style }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
+  </svg>
+);

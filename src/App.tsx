@@ -13,6 +13,7 @@ import Onboarding from './pages/Onboarding';
 import Companies from './pages/Companies';
 import CompanyView from './pages/CompanyView';
 import CompanyManage from './pages/CompanyManage';
+import Messages from './pages/Messages';
 import {
   defaultProfile,
   sampleCompanies,
@@ -27,6 +28,7 @@ export type Page =
   | 'jobs'
   | 'login'
   | 'mypage'
+  | 'messages'
   | 'postDetail'
   | 'postEditor'
   | 'settings'
@@ -36,7 +38,7 @@ export type Page =
   | 'companyManage';
 
 const PAGES_WITH_NAV: Page[] = [
-  'landing', 'profile', 'explore', 'jobs', 'mypage',
+  'landing', 'profile', 'explore', 'jobs', 'mypage', 'messages',
   'postDetail', 'postEditor', 'settings', 'companies', 'company', 'companyManage',
 ];
 
@@ -211,6 +213,7 @@ const App: React.FC = () => {
 
       {page === 'explore' && <Explore onNavigate={navigate} />}
       {page === 'jobs' && <Jobs />}
+      {page === 'messages' && <Messages />}
 
       {page === 'login' && <Login onLogin={handleLogin} onNavigate={navigate} />}
 
