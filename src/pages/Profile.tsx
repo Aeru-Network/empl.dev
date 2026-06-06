@@ -4,7 +4,7 @@ import type { ProfileData, Project, Post } from '../data/defaultData';
 import {
   GithubIcon, EmailIcon, TwitterIcon, WebsiteIcon,
   LocationIcon, BriefcaseIcon, StarIcon, HeartIcon, EyeIcon, ClockIcon,
-  UserIcon, PencilIcon, SparklesIcon,
+  UserIcon, PencilIcon, SparklesIcon, PlusIcon, TrashIcon,
 } from '../components/Icons';
 import ProjectModal from '../components/ProjectModal';
 import FollowListModal, { type FollowTab } from '../components/FollowListModal';
@@ -15,6 +15,8 @@ interface ProfileProps {
   onInitialize: () => void;
   onEdit: () => void;
   onUpdateProfile: (p: ProfileData) => void;
+  onNewPost: () => void;
+  onEditPost: (postId: string) => void;
 }
 
 const D = {
@@ -50,12 +52,11 @@ const EmptyHint: React.FC<{ text: string }> = ({ text }) => (
   </div>
 );
 
-const Profile: React.FC<ProfileProps> = ({ profile, onPostClick, onInitialize, onEdit }) => {
+const Profile: React.FC<ProfileProps> = ({ profile, onPostClick, onInitialize, onEdit, onUpdateProfile, onNewPost, onEditPost }) => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showAllProjects, setShowAllProjects] = useState(false);
   const [showAllPosts, setShowAllPosts] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
-  const [followed, setFollowed] = useState(false);
   const [activeTab, setActiveTab] = useState<MobileTab | null>(null);
   const [followModal, setFollowModal] = useState<FollowTab | null>(null);
 
@@ -129,19 +130,6 @@ const Profile: React.FC<ProfileProps> = ({ profile, onPostClick, onInitialize, o
             {p.headline && <p style={{ fontSize: isMobile ? tokens.fontSizes.xs : tokens.fontSizes.sm, color: D.body, margin: '4px 0 0', lineHeight: 1.4 }}>{p.headline}</p>}
           </div>
           <div style={{ display: 'flex', gap: '7px', flexShrink: 0, marginTop: 2 }}>
-            <button
-              onClick={() => setFollowed(f => !f)}
-              style={{
-                padding: isMobile ? '6px 13px' : '7px 16px', borderRadius: 8,
-                fontSize: isMobile ? tokens.fontSizes.xs : tokens.fontSizes.sm, fontWeight: 600, cursor: 'pointer',
-                border: `1px solid ${followed ? D.border : 'transparent'}`,
-                background: followed ? 'rgba(255,255,255,0.05)' : '#fff',
-                color: followed ? D.body : '#000',
-                transition: `all ${tokens.transitions.fast}`,
-              }}
-            >
-              {followed ? '팔로잉' : '팔로우'}
-            </button>
             <button
               onClick={onEdit}
               style={{
@@ -220,10 +208,22 @@ const Profile: React.FC<ProfileProps> = ({ profile, onPostClick, onInitialize, o
     </>
   ) : <EmptyHint text="등록된 프로젝트가 없어요." />;
 
+  const deletePost = (postId: string) => {
+    onUpdateProfile({ ...p, posts: p.posts.filter(post => post.id !== postId) });
+  };
+
   const postsContent = p.posts.length > 0 ? (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {visiblePosts.map(post => <PostCard key={post.id} post={post} onClick={() => onPostClick(post.id)} />)}
+        {visiblePosts.map(post => (
+          <PostCard
+            key={post.id}
+            post={post}
+            onClick={() => onPostClick(post.id)}
+            onEdit={() => onEditPost(post.id)}
+            onDelete={() => deletePost(post.id)}
+          />
+        ))}
       </div>
       <MoreButton show={p.posts.length > 3} expanded={showAllPosts} count={p.posts.length - 3} onToggle={() => setShowAllPosts(v => !v)} />
     </>
@@ -235,7 +235,11 @@ const Profile: React.FC<ProfileProps> = ({ profile, onPostClick, onInitialize, o
       <SectionCard title="스킬">{skillsContent}</SectionCard>
       <SectionCard title="경력 · 학력">{careerContent}</SectionCard>
       <SectionCard title="프로젝트">{projectsContent}</SectionCard>
-      <SectionCard title="포스트">{postsContent}</SectionCard>
+      <SectionCard title="포스트" action={
+        <button onClick={onNewPost} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 7, border: `1px solid ${D.border}`, background: 'transparent', color: D.body, fontSize: tokens.fontSizes.xs, fontWeight: 600, cursor: 'pointer' }}>
+          <PlusIcon size={12} color={D.body} /> 글쓰기
+        </button>
+      }>{postsContent}</SectionCard>
     </div>
   );
 
@@ -371,13 +375,29 @@ const ProjectCard: React.FC<{ project: Project; onClick: () => void }> = ({ proj
   );
 };
 
-const PostCard: React.FC<{ post: Post; onClick: () => void }> = ({ post, onClick }) => {
+const PostCard: React.FC<{ post: Post; onClick: () => void; onEdit?: () => void; onDelete?: () => void }> = ({ post, onClick, onEdit, onDelete }) => {
   const [hovered, setHovered] = useState(false);
   return (
-    <div onClick={onClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ padding: '13px', borderRadius: 8, border: `1px solid ${hovered ? D.borderHover : D.border}`, cursor: 'pointer', transition: `all ${tokens.transitions.fast}`, background: hovered ? 'rgba(255,255,255,0.03)' : D.section }}>
-      <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading, marginBottom: 5, lineHeight: 1.4 }}>{post.title}</div>
-      <p style={{ fontSize: tokens.fontSizes.xs, color: D.body, margin: '0 0 9px', lineHeight: 1.55 }}>{post.excerpt}</p>
+    <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+      style={{ padding: '13px', borderRadius: 8, border: `1px solid ${hovered ? D.borderHover : D.border}`, transition: `all ${tokens.transitions.fast}`, background: hovered ? 'rgba(255,255,255,0.03)' : D.section }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 5 }}>
+        <div onClick={onClick} style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading, lineHeight: 1.4, cursor: 'pointer', flex: 1 }}>{post.title}</div>
+        {hovered && (onEdit || onDelete) && (
+          <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+            {onEdit && (
+              <button onClick={e => { e.stopPropagation(); onEdit(); }} style={{ background: 'none', border: `1px solid ${D.border}`, borderRadius: 6, padding: '3px 7px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <PencilIcon size={11} color={D.muted} />
+              </button>
+            )}
+            {onDelete && (
+              <button onClick={e => { e.stopPropagation(); onDelete(); }} style={{ background: 'none', border: `1px solid rgba(239,68,68,0.2)`, borderRadius: 6, padding: '3px 7px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <TrashIcon size={11} color="#ef4444" />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+      <p onClick={onClick} style={{ fontSize: tokens.fontSizes.xs, color: D.body, margin: '0 0 9px', lineHeight: 1.55, cursor: 'pointer' }}>{post.excerpt}</p>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: 9 }}>
         {post.tags.map(tag => <Tag key={tag} label={tag} />)}
       </div>

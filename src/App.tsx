@@ -7,6 +7,7 @@ import Jobs from './pages/Jobs';
 import Login from './pages/Login';
 import MyPage from './pages/MyPage';
 import PostDetail from './pages/PostDetail';
+import PostEditor from './pages/PostEditor';
 import Settings from './pages/Settings';
 import Onboarding from './pages/Onboarding';
 import Companies from './pages/Companies';
@@ -27,6 +28,7 @@ export type Page =
   | 'login'
   | 'mypage'
   | 'postDetail'
+  | 'postEditor'
   | 'settings'
   | 'onboarding'
   | 'companies'
@@ -35,7 +37,7 @@ export type Page =
 
 const PAGES_WITH_NAV: Page[] = [
   'landing', 'profile', 'explore', 'jobs', 'mypage',
-  'postDetail', 'settings', 'companies', 'company', 'companyManage',
+  'postDetail', 'postEditor', 'settings', 'companies', 'company', 'companyManage',
 ];
 
 const PROFILE_KEY = 'empl.profile';
@@ -72,6 +74,7 @@ const App: React.FC = () => {
 
   const [activeCompanyId, setActiveCompanyId] = useState<string | null>(null);
   const [editingCompanyId, setEditingCompanyId] = useState<string | null>(null);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
 
   /* ── persistence ── */
   useEffect(() => {
@@ -95,6 +98,26 @@ const App: React.FC = () => {
   const handlePostClick = (postId: string) => {
     setActivePostId(postId);
     navigate('postDetail');
+  };
+
+  const handleNewPost = () => {
+    setEditingPostId(null);
+    navigate('postEditor');
+  };
+
+  const handleEditPost = (postId: string) => {
+    setEditingPostId(postId);
+    navigate('postEditor');
+  };
+
+  const handleSavePost = (post: import('./data/defaultData').Post) => {
+    setProfile(prev => {
+      if (!prev) return prev;
+      const exists = prev.posts.some(p => p.id === post.id);
+      const posts = exists ? prev.posts.map(p => p.id === post.id ? post : p) : [post, ...prev.posts];
+      return { ...prev, posts };
+    });
+    navigate('profile');
   };
 
   const handleLogin = () => {
@@ -181,6 +204,8 @@ const App: React.FC = () => {
           onInitialize={() => navigate('onboarding')}
           onEdit={() => navigate('settings')}
           onUpdateProfile={setProfile}
+          onNewPost={handleNewPost}
+          onEditPost={handleEditPost}
         />
       )}
 
@@ -204,8 +229,16 @@ const App: React.FC = () => {
         <PostDetail postId={activePostId} profile={profile} onBack={() => navigate('profile')} />
       )}
 
+      {page === 'postEditor' && (
+        <PostEditor
+          post={editingPostId ? (profile?.posts.find(p => p.id === editingPostId) ?? null) : null}
+          onSave={handleSavePost}
+          onCancel={() => navigate(editingPostId ? 'profile' : 'profile')}
+        />
+      )}
+
       {page === 'settings' && (
-        <Settings profile={profile} onSave={(p) => { setProfile(p); navigate('profile'); }} onReset={resetProfile} onInitialize={() => navigate('onboarding')} />
+        <Settings profile={profile} onSave={(p) => { setProfile(p); navigate('profile'); }} onReset={resetProfile} onInitialize={() => navigate('onboarding')} onNewPost={handleNewPost} onEditPost={handleEditPost} />
       )}
 
       {page === 'onboarding' && (

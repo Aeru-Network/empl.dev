@@ -1,13 +1,15 @@
 import React, { useRef, useState } from 'react';
 import { tokens } from '../tokens';
-import type { ProfileData } from '../data/defaultData';
-import { SparklesIcon, PlusIcon, CloseIcon, CheckIcon, TrashIcon } from '../components/Icons';
+import type { ProfileData, Experience, Project, Post } from '../data/defaultData';
+import { SparklesIcon, PlusIcon, CloseIcon, CheckIcon, TrashIcon, PencilIcon } from '../components/Icons';
 
 interface SettingsProps {
   profile: ProfileData | null;
   onSave: (p: ProfileData) => void;
   onReset: () => void;
   onInitialize: () => void;
+  onNewPost: () => void;
+  onEditPost: (postId: string) => void;
 }
 
 const D = {
@@ -34,7 +36,16 @@ const inputBase: React.CSSProperties = {
 const fileToDataUrl = (file: File): Promise<string> =>
   new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target!.result as string); r.readAsDataURL(file); });
 
-const Settings: React.FC<SettingsProps> = ({ profile, onSave, onReset, onInitialize }) => {
+const GRADIENT_PRESETS = [
+  'linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #1a56db 100%)',
+  'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+  'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+  'linear-gradient(135deg, #ff6a00 0%, #ee0979 100%)',
+];
+
+const Settings: React.FC<SettingsProps> = ({ profile, onSave, onReset, onInitialize, onNewPost, onEditPost }) => {
   if (!profile || !profile.name.trim()) {
     return (
       <div style={{ background: D.bg, minHeight: '100vh', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '80px 20px' }}>
@@ -62,6 +73,8 @@ const Settings: React.FC<SettingsProps> = ({ profile, onSave, onReset, onInitial
   const [skillInput, setSkillInput] = useState('');
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar || '');
   const [bannerUrl, setBannerUrl] = useState(profile.banner || '');
+  const [experiences, setExperiences] = useState<Experience[]>(profile.experience);
+  const [projects, setProjects] = useState<Project[]>(profile.projects);
   const [saved, setSaved] = useState(false);
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -100,6 +113,8 @@ const Settings: React.FC<SettingsProps> = ({ profile, onSave, onReset, onInitial
       skills,
       avatar: avatarUrl,
       banner: bannerUrl || undefined,
+      experience: experiences,
+      projects,
     });
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
@@ -186,6 +201,21 @@ const Settings: React.FC<SettingsProps> = ({ profile, onSave, onReset, onInitial
           </div>
         </Card>
 
+        {/* Experience */}
+        <Card title="경력 · 학력">
+          <ExperienceEditor experiences={experiences} onChange={setExperiences} />
+        </Card>
+
+        {/* Projects */}
+        <Card title="프로젝트">
+          <ProjectEditor projects={projects} onChange={setProjects} />
+        </Card>
+
+        {/* Posts */}
+        <Card title="포스트 관리">
+          <PostManager posts={profile.posts} onNew={onNewPost} onEdit={onEditPost} />
+        </Card>
+
         {/* Notifications */}
         <Card title="알림 설정">
           {[
@@ -226,6 +256,249 @@ const Settings: React.FC<SettingsProps> = ({ profile, onSave, onReset, onInitial
     </div>
   );
 };
+
+/* ── Experience Editor ── */
+
+const emptyExp = (): Omit<Experience, 'id'> => ({ type: 'work', title: '', organization: '', period: '', description: '' });
+
+const ExperienceEditor: React.FC<{ experiences: Experience[]; onChange: (exps: Experience[]) => void }> = ({ experiences, onChange }) => {
+  const [editId, setEditId] = useState<string | 'new' | null>(null);
+  const [draft, setDraft] = useState<Omit<Experience, 'id'>>(emptyExp());
+
+  const startNew = () => { setDraft(emptyExp()); setEditId('new'); };
+  const startEdit = (exp: Experience) => { setDraft({ type: exp.type, title: exp.title, organization: exp.organization, period: exp.period, description: exp.description }); setEditId(exp.id); };
+  const cancel = () => setEditId(null);
+
+  const save = () => {
+    if (!draft.title.trim()) return;
+    if (editId === 'new') {
+      onChange([...experiences, { ...draft, id: 'exp-' + Date.now() }]);
+    } else if (editId) {
+      onChange(experiences.map(e => e.id === editId ? { ...e, ...draft } : e));
+    }
+    setEditId(null);
+  };
+
+  const remove = (id: string) => onChange(experiences.filter(e => e.id !== id));
+
+  const focus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => (e.target.style.borderColor = D.borderFocus);
+  const blur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => (e.target.style.borderColor = D.inputBorder);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {experiences.map(exp => (
+        editId === exp.id ? (
+          <ExpForm key={exp.id} draft={draft} onChange={setDraft} onSave={save} onCancel={cancel} focus={focus} blur={blur} />
+        ) : (
+          <div key={exp.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 8, border: `1px solid ${D.border}`, background: 'rgba(255,255,255,0.02)' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading }}>{exp.title}</div>
+              <div style={{ fontSize: tokens.fontSizes.xs, color: D.body, marginTop: 2 }}>{exp.organization} · {exp.period}</div>
+              <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted, marginTop: 4, lineHeight: 1.5 }}>{exp.description}</div>
+            </div>
+            <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+              <button onClick={() => startEdit(exp)} style={{ background: 'none', border: `1px solid ${D.border}`, borderRadius: 6, padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <PencilIcon size={12} color={D.muted} />
+              </button>
+              <button onClick={() => remove(exp.id)} style={{ background: 'none', border: `1px solid rgba(239,68,68,0.2)`, borderRadius: 6, padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <TrashIcon size={12} color="#ef4444" />
+              </button>
+            </div>
+          </div>
+        )
+      ))}
+      {editId === 'new' && (
+        <ExpForm draft={draft} onChange={setDraft} onSave={save} onCancel={cancel} focus={focus} blur={blur} />
+      )}
+      {editId === null && (
+        <button onClick={startNew} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px', borderRadius: 8, border: `1px dashed ${D.border}`, background: 'none', color: D.muted, fontSize: tokens.fontSizes.sm, cursor: 'pointer', marginTop: 2 }}>
+          <PlusIcon size={14} color={D.muted} /> 경력 · 학력 추가
+        </button>
+      )}
+    </div>
+  );
+};
+
+const ExpForm: React.FC<{
+  draft: Omit<Experience, 'id'>;
+  onChange: (d: Omit<Experience, 'id'>) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  focus: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  blur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+}> = ({ draft, onChange, onSave, onCancel, focus, blur }) => (
+  <div style={{ border: `1px solid ${D.borderFocus}`, borderRadius: 8, padding: '14px', display: 'flex', flexDirection: 'column', gap: 10, background: 'rgba(255,255,255,0.02)' }}>
+    <div style={{ display: 'flex', gap: 8 }}>
+      {(['work', 'education'] as const).map(type => (
+        <button key={type} onClick={() => onChange({ ...draft, type })} style={{ flex: 1, padding: '7px', borderRadius: 7, border: `1px solid ${draft.type === type ? D.accent : D.border}`, background: draft.type === type ? D.accentDim : 'none', color: draft.type === type ? D.accent : D.muted, fontSize: tokens.fontSizes.xs, fontWeight: 600, cursor: 'pointer' }}>
+          {type === 'work' ? '직장' : '학력'}
+        </button>
+      ))}
+    </div>
+    <input style={{ ...inputBase }} placeholder={draft.type === 'work' ? '직책 (예: Senior Engineer)' : '전공 / 학위'} value={draft.title} onChange={e => onChange({ ...draft, title: e.target.value })} onFocus={focus} onBlur={blur} />
+    <input style={{ ...inputBase }} placeholder={draft.type === 'work' ? '회사명' : '학교명'} value={draft.organization} onChange={e => onChange({ ...draft, organization: e.target.value })} onFocus={focus} onBlur={blur} />
+    <input style={{ ...inputBase }} placeholder="기간 (예: 2022.03 – 현재)" value={draft.period} onChange={e => onChange({ ...draft, period: e.target.value })} onFocus={focus} onBlur={blur} />
+    <textarea style={{ ...inputBase, resize: 'vertical', lineHeight: 1.6, minHeight: 70 }} placeholder="설명 (주요 업무, 성과 등)" value={draft.description} onChange={e => onChange({ ...draft, description: e.target.value })} onFocus={focus} onBlur={blur} />
+    <div style={{ display: 'flex', gap: 8 }}>
+      <button onClick={onCancel} style={{ flex: 1, padding: '8px', borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', color: D.muted, fontSize: tokens.fontSizes.sm, cursor: 'pointer', fontWeight: 500 }}>취소</button>
+      <button onClick={onSave} style={{ flex: 2, padding: '8px', borderRadius: 7, border: 'none', background: '#fff', color: '#000', fontSize: tokens.fontSizes.sm, cursor: 'pointer', fontWeight: 700 }}>저장</button>
+    </div>
+  </div>
+);
+
+/* ── Project Editor ── */
+
+const emptyProj = (): Omit<Project, 'id'> => ({
+  title: '', description: '', longDescription: '', techStack: [],
+  githubUrl: '', demoUrl: '', stars: undefined, imageGradient: GRADIENT_PRESETS[0],
+});
+
+const ProjectEditor: React.FC<{ projects: Project[]; onChange: (projs: Project[]) => void }> = ({ projects, onChange }) => {
+  const [editId, setEditId] = useState<string | 'new' | null>(null);
+  const [draft, setDraft] = useState<Omit<Project, 'id'>>(emptyProj());
+
+  const startNew = () => { setDraft(emptyProj()); setEditId('new'); };
+  const startEdit = (p: Project) => {
+    setDraft({ title: p.title, description: p.description, longDescription: p.longDescription, techStack: [...p.techStack], githubUrl: p.githubUrl ?? '', demoUrl: p.demoUrl ?? '', stars: p.stars, imageGradient: p.imageGradient });
+    setEditId(p.id);
+  };
+  const cancel = () => setEditId(null);
+
+  const save = () => {
+    if (!draft.title.trim()) return;
+    if (editId === 'new') {
+      onChange([...projects, { ...draft, id: 'proj-' + Date.now() }]);
+    } else if (editId) {
+      onChange(projects.map(p => p.id === editId ? { ...p, ...draft } : p));
+    }
+    setEditId(null);
+  };
+
+  const remove = (id: string) => onChange(projects.filter(p => p.id !== id));
+
+  const focus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => (e.target.style.borderColor = D.borderFocus);
+  const blur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => (e.target.style.borderColor = D.inputBorder);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {projects.map(proj => (
+        editId === proj.id ? (
+          <ProjForm key={proj.id} draft={draft} onChange={setDraft} onSave={save} onCancel={cancel} focus={focus} blur={blur} />
+        ) : (
+          <div key={proj.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 8, border: `1px solid ${D.border}`, background: 'rgba(255,255,255,0.02)' }}>
+            <div style={{ width: 32, height: 32, borderRadius: 6, background: proj.imageGradient, flexShrink: 0, marginTop: 2 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading }}>{proj.title}</div>
+              <div style={{ fontSize: tokens.fontSizes.xs, color: D.body, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{proj.description}</div>
+              <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted, marginTop: 4 }}>{proj.techStack.slice(0, 4).join(' · ')}</div>
+            </div>
+            <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+              <button onClick={() => startEdit(proj)} style={{ background: 'none', border: `1px solid ${D.border}`, borderRadius: 6, padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <PencilIcon size={12} color={D.muted} />
+              </button>
+              <button onClick={() => remove(proj.id)} style={{ background: 'none', border: `1px solid rgba(239,68,68,0.2)`, borderRadius: 6, padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <TrashIcon size={12} color="#ef4444" />
+              </button>
+            </div>
+          </div>
+        )
+      ))}
+      {editId === 'new' && (
+        <ProjForm draft={draft} onChange={setDraft} onSave={save} onCancel={cancel} focus={focus} blur={blur} />
+      )}
+      {editId === null && (
+        <button onClick={startNew} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px', borderRadius: 8, border: `1px dashed ${D.border}`, background: 'none', color: D.muted, fontSize: tokens.fontSizes.sm, cursor: 'pointer', marginTop: 2 }}>
+          <PlusIcon size={14} color={D.muted} /> 프로젝트 추가
+        </button>
+      )}
+    </div>
+  );
+};
+
+const ProjForm: React.FC<{
+  draft: Omit<Project, 'id'>;
+  onChange: (d: Omit<Project, 'id'>) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  focus: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  blur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+}> = ({ draft, onChange, onSave, onCancel, focus, blur }) => {
+  const [techInput, setTechInput] = useState('');
+
+  const addTech = () => {
+    const v = techInput.trim();
+    if (v && !draft.techStack.includes(v)) onChange({ ...draft, techStack: [...draft.techStack, v] });
+    setTechInput('');
+  };
+
+  return (
+    <div style={{ border: `1px solid ${D.borderFocus}`, borderRadius: 8, padding: '14px', display: 'flex', flexDirection: 'column', gap: 10, background: 'rgba(255,255,255,0.02)' }}>
+      <input style={{ ...inputBase }} placeholder="프로젝트명" value={draft.title} onChange={e => onChange({ ...draft, title: e.target.value })} onFocus={focus} onBlur={blur} />
+      <textarea style={{ ...inputBase, resize: 'vertical', lineHeight: 1.6, minHeight: 60 }} placeholder="짧은 설명 (카드에 표시)" value={draft.description} onChange={e => onChange({ ...draft, description: e.target.value })} onFocus={focus} onBlur={blur} />
+      <textarea style={{ ...inputBase, resize: 'vertical', lineHeight: 1.6, minHeight: 90 }} placeholder="상세 설명 (마크다운 지원)" value={draft.longDescription} onChange={e => onChange({ ...draft, longDescription: e.target.value })} onFocus={focus} onBlur={blur} />
+      <div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input style={{ ...inputBase, flex: 1 }} placeholder="기술 스택 (Enter로 추가)" value={techInput} onChange={e => setTechInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTech(); } }} onFocus={focus} onBlur={blur} />
+          <button onClick={addTech} style={{ flexShrink: 0, padding: '0 12px', borderRadius: 8, border: 'none', background: '#fff', color: '#000', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+            <PlusIcon size={14} color="#000" />
+          </button>
+        </div>
+        {draft.techStack.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
+            {draft.techStack.map(t => (
+              <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: D.tag, color: D.tagText, padding: '3px 6px 3px 9px', borderRadius: 999, fontSize: tokens.fontSizes.xs, border: `1px solid ${D.border}` }}>
+                {t}
+                <button onClick={() => onChange({ ...draft, techStack: draft.techStack.filter(x => x !== t) })} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0 }}>
+                  <CloseIcon size={11} color={D.tagText} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <input style={{ ...inputBase, flex: 1 }} placeholder="GitHub URL (선택)" value={draft.githubUrl ?? ''} onChange={e => onChange({ ...draft, githubUrl: e.target.value })} onFocus={focus} onBlur={blur} />
+        <input style={{ ...inputBase, flex: 1 }} placeholder="데모 URL (선택)" value={draft.demoUrl ?? ''} onChange={e => onChange({ ...draft, demoUrl: e.target.value })} onFocus={focus} onBlur={blur} />
+      </div>
+      <input style={{ ...inputBase }} placeholder="GitHub Stars (선택)" type="number" value={draft.stars ?? ''} onChange={e => onChange({ ...draft, stars: e.target.value ? Number(e.target.value) : undefined })} onFocus={focus} onBlur={blur} />
+      <div>
+        <div style={labelStyle}>배경 색상</div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {GRADIENT_PRESETS.map(g => (
+            <button key={g} onClick={() => onChange({ ...draft, imageGradient: g })} style={{ width: 40, height: 28, borderRadius: 6, background: g, border: draft.imageGradient === g ? '2px solid #fff' : `2px solid transparent`, cursor: 'pointer', padding: 0 }} />
+          ))}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={onCancel} style={{ flex: 1, padding: '8px', borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', color: D.muted, fontSize: tokens.fontSizes.sm, cursor: 'pointer', fontWeight: 500 }}>취소</button>
+        <button onClick={onSave} style={{ flex: 2, padding: '8px', borderRadius: 7, border: 'none', background: '#fff', color: '#000', fontSize: tokens.fontSizes.sm, cursor: 'pointer', fontWeight: 700 }}>저장</button>
+      </div>
+    </div>
+  );
+};
+
+/* ── Post Manager ── */
+
+const PostManager: React.FC<{ posts: Post[]; onNew: () => void; onEdit: (id: string) => void }> = ({ posts, onNew, onEdit }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    {posts.map(post => (
+      <div key={post.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, border: `1px solid ${D.border}`, background: 'rgba(255,255,255,0.02)' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</div>
+          <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted, marginTop: 2 }}>{post.date} · {post.readingTime}분 읽기</div>
+        </div>
+        <button onClick={() => onEdit(post.id)} style={{ background: 'none', border: `1px solid ${D.border}`, borderRadius: 6, padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          <PencilIcon size={12} color={D.muted} />
+        </button>
+      </div>
+    ))}
+    <button onClick={onNew} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px', borderRadius: 8, border: `1px dashed ${D.border}`, background: 'none', color: D.muted, fontSize: tokens.fontSizes.sm, cursor: 'pointer', marginTop: 2 }}>
+      <PlusIcon size={14} color={D.muted} /> 새 포스트 작성
+    </button>
+  </div>
+);
+
+/* ── Shared sub-components ── */
 
 const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div style={{ background: '#0f0f0f', borderRadius: 12, border: `1px solid rgba(255,255,255,0.08)`, padding: '22px 24px', marginBottom: 14 }}>

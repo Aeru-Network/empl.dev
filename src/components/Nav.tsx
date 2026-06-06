@@ -5,7 +5,7 @@ import type { ProfileData } from '../data/defaultData';
 
 type Page =
   | 'landing' | 'profile' | 'explore' | 'jobs' | 'login' | 'mypage'
-  | 'postDetail' | 'settings' | 'onboarding' | 'companies' | 'company' | 'companyManage';
+  | 'postDetail' | 'postEditor' | 'settings' | 'onboarding' | 'companies' | 'company' | 'companyManage';
 
 interface NavProps {
   currentPage: Page;
