@@ -1,17 +1,18 @@
 import React from 'react';
 import { tokens } from '../tokens';
-import { defaultProfile } from '../data/defaultData';
+import { defaultProfile, type ProfileData } from '../data/defaultData';
 import { HeartIcon, EyeIcon, ClockIcon, LocationIcon } from '../components/Icons';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 
 interface PostDetailProps {
   postId: string;
+  profile: ProfileData | null;
   onBack: () => void;
 }
 
-const PostDetail: React.FC<PostDetailProps> = ({ postId, onBack }) => {
-  const post = defaultProfile.posts.find(p => p.id === postId) ?? defaultProfile.posts[0];
-  const profile = defaultProfile;
+const PostDetail: React.FC<PostDetailProps> = ({ postId, profile: profileProp, onBack }) => {
+  const profile = profileProp && profileProp.posts.length > 0 ? profileProp : defaultProfile;
+  const post = profile.posts.find(p => p.id === postId) ?? profile.posts[0] ?? defaultProfile.posts[0];
 
   return (
     <div style={{ background: tokens.colors.background, minHeight: '100vh' }}>

@@ -3,7 +3,9 @@ import { tokens } from '../tokens';
 import { SearchIcon, CodeIcon, BriefcaseIcon, UsersIcon } from '../components/Icons';
 import { exploreProfiles, sampleJobs } from '../data/defaultData';
 
-type Page = 'landing' | 'profile' | 'explore' | 'jobs' | 'login' | 'mypage' | 'postDetail' | 'settings';
+type Page =
+  | 'landing' | 'profile' | 'explore' | 'jobs' | 'login' | 'mypage'
+  | 'postDetail' | 'settings' | 'onboarding' | 'companies' | 'company' | 'companyManage';
 
 interface LandingProps {
   onNavigate: (page: Page) => void;
@@ -16,6 +18,32 @@ const StatBadge: React.FC<{ value: string; label: string }> = ({ value, label })
   </div>
 );
 
+const FeatureCard: React.FC<{ icon: React.ReactNode; color: string; title: string; desc: string }> = ({ icon, color, title, desc }) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: tokens.colors.surface, borderRadius: tokens.borderRadius.xl, padding: '28px 24px',
+        border: `1px solid ${hovered ? color : tokens.colors.border}`,
+        boxShadow: hovered ? tokens.shadows.lg : tokens.shadows.card,
+        transform: hovered ? 'translateY(-3px)' : 'none',
+        transition: `all ${tokens.transitions.normal}`,
+      }}
+    >
+      <div style={{
+        width: 46, height: 46, borderRadius: tokens.borderRadius.lg, backgroundColor: color + '18',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16,
+      }}>
+        {icon}
+      </div>
+      <div style={{ fontSize: tokens.fontSizes.md, fontWeight: tokens.fontWeights.bold, color: tokens.colors.textPrimary, marginBottom: 8 }}>{title}</div>
+      <p style={{ fontSize: tokens.fontSizes.sm, color: tokens.colors.textSecondary, margin: 0, lineHeight: 1.65 }}>{desc}</p>
+    </div>
+  );
+};
+
 const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
   const [searchValue, setSearchValue] = useState('');
 
@@ -27,10 +55,15 @@ const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
       {/* Hero */}
       <div style={{
         background: tokens.colors.navyGrad,
-        padding: '72px 20px 80px',
+        padding: '84px 20px 88px',
         textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden',
       }}>
-        <div style={{ maxWidth: 640, margin: '0 auto' }}>
+        {/* decorative glows */}
+        <div style={{ position: 'absolute', top: -120, left: '15%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.35) 0%, transparent 70%)', filter: 'blur(20px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: -140, right: '10%', width: 380, height: 380, borderRadius: '50%', background: 'radial-gradient(circle, rgba(26,86,219,0.35) 0%, transparent 70%)', filter: 'blur(20px)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 640, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -120,49 +153,26 @@ const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
       </div>
 
       {/* Features */}
-      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '60px 20px' }}>
-        <h2 style={{
-          fontSize: tokens.fontSizes.xl,
-          fontWeight: tokens.fontWeights.bold,
-          color: tokens.colors.textPrimary,
-          textAlign: 'center',
-          marginBottom: 40,
-          letterSpacing: '-0.3px',
-        }}>
-          왜 empl.dev인가요?
-        </h2>
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '64px 20px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <div style={{ fontSize: tokens.fontSizes.xs, fontWeight: tokens.fontWeights.bold, color: tokens.colors.primary, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 8 }}>
+            FEATURES
+          </div>
+          <h2 style={{ fontSize: tokens.fontSizes.xxl, fontWeight: tokens.fontWeights.extrabold, color: tokens.colors.textPrimary, margin: 0, letterSpacing: '-0.5px' }}>
+            왜 empl.dev인가요?
+          </h2>
+        </div>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: '20px',
+          gap: '18px',
         }}>
           {[
-            { icon: <CodeIcon size={22} color={tokens.colors.primary} />, title: '코드 포트폴리오', desc: 'GitHub 연동으로 프로젝트와 기여도를 자동으로 가져와 보여줍니다.' },
-            { icon: <BriefcaseIcon size={22} color={tokens.colors.accent} />, title: '개발자 맞춤 채용', desc: '기술 스택 기반 매칭으로 딱 맞는 포지션을 추천받으세요.' },
-            { icon: <UsersIcon size={22} color={tokens.colors.success} />, title: '개발자 네트워크', desc: '같은 기술을 쓰는 개발자들과 연결하고 오픈소스로 협업하세요.' },
+            { icon: <CodeIcon size={22} color={tokens.colors.primary} />, color: tokens.colors.primary, title: '코드 포트폴리오', desc: 'GitHub 연동으로 프로젝트와 기여도를 자동으로 가져와 보여줍니다.' },
+            { icon: <BriefcaseIcon size={22} color={tokens.colors.accent} />, color: tokens.colors.accent, title: '개발자 맞춤 채용', desc: '기술 스택 기반 매칭으로 딱 맞는 포지션을 추천받으세요.' },
+            { icon: <UsersIcon size={22} color={tokens.colors.success} />, color: tokens.colors.success, title: '개발자 네트워크', desc: '같은 기술을 쓰는 개발자들과 연결하고 오픈소스로 협업하세요.' },
           ].map((f, i) => (
-            <div key={i} style={{
-              background: tokens.colors.surface,
-              borderRadius: tokens.borderRadius.xl,
-              padding: '28px 24px',
-              border: `1px solid ${tokens.colors.border}`,
-              boxShadow: tokens.shadows.card,
-            }}>
-              <div style={{
-                width: 44,
-                height: 44,
-                borderRadius: tokens.borderRadius.lg,
-                backgroundColor: tokens.colors.surfaceAlt,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 16,
-              }}>
-                {f.icon}
-              </div>
-              <div style={{ fontSize: tokens.fontSizes.md, fontWeight: tokens.fontWeights.bold, color: tokens.colors.textPrimary, marginBottom: 8 }}>{f.title}</div>
-              <p style={{ fontSize: tokens.fontSizes.sm, color: tokens.colors.textSecondary, margin: 0, lineHeight: 1.65 }}>{f.desc}</p>
-            </div>
+            <FeatureCard key={i} icon={f.icon} color={f.color} title={f.title} desc={f.desc} />
           ))}
         </div>
       </div>

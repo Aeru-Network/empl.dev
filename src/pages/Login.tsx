@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { tokens } from '../tokens';
 import { GithubIcon } from '../components/Icons';
 
-type Page = 'landing' | 'profile' | 'explore' | 'jobs' | 'login' | 'mypage' | 'postDetail' | 'settings';
+type Page =
+  | 'landing' | 'profile' | 'explore' | 'jobs' | 'login' | 'mypage'
+  | 'postDetail' | 'settings' | 'onboarding' | 'companies' | 'company' | 'companyManage';
 
 interface LoginProps {
   onNavigate: (page: Page) => void;
+  onLogin: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onNavigate }) => {
+const Login: React.FC<LoginProps> = ({ onNavigate, onLogin }) => {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -87,7 +90,7 @@ const Login: React.FC<LoginProps> = ({ onNavigate }) => {
         {/* OAuth */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
           <button
-            onClick={() => onNavigate('profile')}
+            onClick={onLogin}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -166,7 +169,7 @@ const Login: React.FC<LoginProps> = ({ onNavigate }) => {
             />
           </div>
           <button
-            onClick={() => onNavigate('profile')}
+            onClick={onLogin}
             style={{
               padding: '10px',
               background: tokens.colors.primary,

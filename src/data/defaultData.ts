@@ -428,3 +428,182 @@ export const exploreProfiles: ExploreProfile[] = [
     followers: 980,
   },
 ];
+
+/* ─────────────────────────────────────────────
+   Follow connections (팔로워 / 팔로잉)
+   ───────────────────────────────────────────── */
+export interface FollowUser {
+  id: string;
+  name: string;
+  headline: string;
+  avatar: string;
+  isFollowing: boolean; // 현재 사용자가 이 사람을 팔로우하는지
+}
+
+export const sampleFollowers: FollowUser[] = [
+  { id: 'fl-1', name: '이서연', headline: 'iOS Engineer · Swift & SwiftUI', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=seoyeon&backgroundColor=ffd5dc', isFollowing: true },
+  { id: 'fl-2', name: '박도현', headline: 'ML Engineer · LLM & Computer Vision', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=dohyun&backgroundColor=c0aede', isFollowing: false },
+  { id: 'fl-3', name: '최지은', headline: 'DevOps · Kubernetes & Platform Eng', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jieun&backgroundColor=b6e3f4', isFollowing: true },
+  { id: 'fl-4', name: '정우진', headline: 'Blockchain Developer · Web3', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=woojin&backgroundColor=d1d4f9', isFollowing: false },
+  { id: 'fl-5', name: '강민서', headline: 'Frontend Engineer · Design System', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=minseo&backgroundColor=f4d58d', isFollowing: false },
+];
+
+export const sampleFollowing: FollowUser[] = [
+  { id: 'fg-1', name: '한재원', headline: 'Backend Engineer · Go & Distributed Systems', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jaewon&backgroundColor=a8e6cf', isFollowing: true },
+  { id: 'fg-2', name: '박도현', headline: 'ML Engineer · LLM & Computer Vision', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=dohyun&backgroundColor=c0aede', isFollowing: true },
+  { id: 'fg-3', name: '최지은', headline: 'DevOps · Kubernetes & Platform Eng', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jieun&backgroundColor=b6e3f4', isFollowing: true },
+  { id: 'fg-4', name: 'Toss Tech', headline: '토스 기술 블로그 공식 계정', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Toss&backgroundColor=0064ff', isFollowing: true },
+];
+
+/* ─────────────────────────────────────────────
+   Company pages (LinkedIn 스타일)
+   ───────────────────────────────────────────── */
+export interface CompanyOpening {
+  id: string;
+  title: string;
+  location: string;
+  type: string;
+  tags: string[];
+}
+
+export interface CompanyMember {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+}
+
+export interface Company {
+  id: string;
+  name: string;
+  tagline: string;
+  logoGradient: string;
+  coverGradient: string;
+  industry: string;
+  size: string;
+  location: string;
+  website: string;
+  about: string;
+  founded: string;
+  followers: number;
+  isManaged: boolean; // 현재 사용자가 관리자인지
+  openings: CompanyOpening[];
+  members: CompanyMember[];
+}
+
+const NAVY_COVER = 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #1a56db 100%)';
+
+export const sampleCompanies: Company[] = [
+  {
+    id: 'comp-1',
+    name: 'Aeru',
+    tagline: '개발자를 위한 차세대 협업 플랫폼',
+    logoGradient: 'linear-gradient(135deg, #1a56db 0%, #6366f1 100%)',
+    coverGradient: NAVY_COVER,
+    industry: '소프트웨어 · 개발자 도구',
+    size: '51-200명',
+    location: '서울 강남구',
+    website: 'https://aeru.dev',
+    about: 'Aeru는 분산된 개발팀이 코드, 문서, 의사결정을 한곳에서 관리할 수 있는 협업 플랫폼을 만듭니다.\n\n실시간 동기화 엔진과 AI 기반 코드 리뷰를 핵심으로, 전 세계 3,000개 이상의 팀이 Aeru를 사용하고 있습니다. 우리는 "개발자가 코드에만 집중할 수 있는 환경"을 목표로 합니다.',
+    founded: '2021',
+    followers: 4820,
+    isManaged: true,
+    openings: [
+      { id: 'co-1', title: 'Senior Frontend Engineer', location: '서울 · 원격', type: 'full-time', tags: ['React', 'TypeScript', 'WebSocket'] },
+      { id: 'co-2', title: 'Backend Engineer (Go)', location: '서울', type: 'full-time', tags: ['Go', 'gRPC', 'PostgreSQL'] },
+      { id: 'co-3', title: 'Product Designer', location: '원격', type: 'contract', tags: ['Figma', 'Design System'] },
+    ],
+    members: [
+      { id: 'cm-1', name: '이서연', role: 'Head of Engineering', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=seoyeon&backgroundColor=ffd5dc' },
+      { id: 'cm-2', name: '박도현', role: 'ML Lead', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=dohyun&backgroundColor=c0aede' },
+      { id: 'cm-3', name: '최지은', role: 'DevOps Engineer', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jieun&backgroundColor=b6e3f4' },
+    ],
+  },
+  {
+    id: 'comp-2',
+    name: 'Nimbus Cloud',
+    tagline: '클라우드 인프라를 단순하게',
+    logoGradient: 'linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%)',
+    coverGradient: 'linear-gradient(135deg, #0c4a6e 0%, #0ea5e9 100%)',
+    industry: '클라우드 · 인프라',
+    size: '201-500명',
+    location: '판교',
+    website: 'https://nimbus.cloud',
+    about: 'Nimbus Cloud는 스타트업이 인프라 걱정 없이 제품에만 집중할 수 있도록 매니지드 쿠버네티스와 서버리스 플랫폼을 제공합니다.',
+    founded: '2019',
+    followers: 8910,
+    isManaged: false,
+    openings: [
+      { id: 'co-4', title: 'Platform Engineer', location: '판교', type: 'full-time', tags: ['Kubernetes', 'Terraform', 'AWS'] },
+      { id: 'co-5', title: 'SRE', location: '원격', type: 'full-time', tags: ['Go', 'Prometheus', 'Linux'] },
+    ],
+    members: [
+      { id: 'cm-4', name: '한재원', role: 'Staff Engineer', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jaewon&backgroundColor=a8e6cf' },
+      { id: 'cm-5', name: '강민서', role: 'Frontend Lead', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=minseo&backgroundColor=f4d58d' },
+    ],
+  },
+  {
+    id: 'comp-3',
+    name: 'Forge Labs',
+    tagline: 'AI 에이전트로 일하는 방식을 바꿉니다',
+    logoGradient: 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)',
+    coverGradient: 'linear-gradient(135deg, #2e1065 0%, #7c3aed 100%)',
+    industry: 'AI · 머신러닝',
+    size: '11-50명',
+    location: '서울 성수동',
+    website: 'https://forgelabs.ai',
+    about: 'Forge Labs는 업무 자동화를 위한 AI 에이전트 프레임워크를 개발하는 초기 스타트업입니다. 빠르게 성장하는 팀에서 큰 임팩트를 만들고 싶은 분을 찾습니다.',
+    founded: '2023',
+    followers: 1240,
+    isManaged: false,
+    openings: [
+      { id: 'co-6', title: 'Founding Engineer', location: '서울', type: 'full-time', tags: ['Python', 'LLM', 'React'] },
+    ],
+    members: [
+      { id: 'cm-6', name: '정우진', role: 'Co-founder / CTO', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=woojin&backgroundColor=d1d4f9' },
+    ],
+  },
+];
+
+/* ─────────────────────────────────────────────
+   Empty profile factory — 신규 사용자는 빈 프로필로 시작
+   ───────────────────────────────────────────── */
+export function createEmptyProfile(): ProfileData {
+  return {
+    id: 'me',
+    name: '',
+    headline: '',
+    bio: '',
+    avatar: '',
+    location: '',
+    role: '',
+    yearsOfExp: 0,
+    followers: 0,
+    following: 0,
+    skills: [],
+    socialLinks: [],
+    experience: [],
+    projects: [],
+    posts: [],
+  };
+}
+
+export function createEmptyCompany(): Company {
+  return {
+    id: 'comp-' + Date.now(),
+    name: '',
+    tagline: '',
+    logoGradient: 'linear-gradient(135deg, #1a56db 0%, #6366f1 100%)',
+    coverGradient: NAVY_COVER,
+    industry: '',
+    size: '1-10명',
+    location: '',
+    website: '',
+    about: '',
+    founded: String(new Date().getFullYear()),
+    followers: 0,
+    isManaged: true,
+    openings: [],
+    members: [],
+  };
+}
