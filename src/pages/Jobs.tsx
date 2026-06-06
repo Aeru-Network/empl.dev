@@ -22,22 +22,6 @@ const TYPE_BADGE: Record<string, { bg: string; text: string }> = {
   'part-time': { bg: 'rgba(14,165,233,0.1)', text: '#38bdf8' },
 };
 
-const JOB_DETAILS: Record<string, { responsibilities: string[]; requirements: string[]; preferred: string[]; benefits: string[] }> = {
-  'job-1': {
-    responsibilities: ['Next.js 기반 프론트엔드 개발 및 성능 최적화', 'UI/UX 디자인 팀과 협업하여 사용자 경험 개선', 'TypeScript 기반 컴포넌트 라이브러리 구축', 'Core Web Vitals 지표 모니터링 및 개선'],
-    requirements: ['React/Next.js 3년 이상 실무 경험', 'TypeScript 능숙', 'REST API 및 GraphQL 연동 경험', '크로스브라우저 호환성 이해'],
-    preferred: ['Figma 협업 경험', 'AWS/Vercel 배포 경험', '오픈소스 기여 경험'],
-    benefits: ['스톡옵션 제공', '유연 근무제 (주 2회 재택)', '연간 교육비 200만원', '최신 장비 지원', '점심 제공'],
-  },
-};
-
-const getJobDetail = (id: string) =>
-  JOB_DETAILS[id] ?? {
-    responsibilities: ['서비스 기획 및 개발', '팀원과 협업하여 제품 품질 향상', '코드 리뷰 및 기술 부채 개선', '성능 모니터링 및 장애 대응'],
-    requirements: ['관련 기술 3년 이상 경험', '협업 도구 활용 능력', '문서화 습관', '자기 주도적 업무 능력'],
-    preferred: ['해당 도메인 스타트업 경험', '오픈소스 기여 경험', '영어 기술 문서 독해 가능'],
-    benefits: ['스톡옵션 제공', '유연 근무제', '교육비 지원', '최신 장비 지원'],
-  };
 
 const Jobs: React.FC = () => {
   const [search, setSearch] = useState('');
@@ -262,7 +246,6 @@ const JobDetail: React.FC<{
   onApply: () => void;
 }> = ({ job, saved, applied, applyLoading, onClose, onToggleSave, onApply }) => {
   const tc = TYPE_BADGE[job.type] ?? { bg: D.tag, text: D.body };
-  const detail = getJobDetail(job.id);
 
   return (
     <div style={{
@@ -346,45 +329,15 @@ const JobDetail: React.FC<{
           <p style={{ fontSize: tokens.fontSizes.sm, color: D.body, margin: 0, lineHeight: 1.7 }}>{job.description}</p>
         </DetailSection>
 
-        <DetailSection title="주요 업무">
-          <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {detail.responsibilities.map((r, i) => (
-              <li key={i} style={{ fontSize: tokens.fontSizes.sm, color: D.body, lineHeight: 1.6 }}>{r}</li>
-            ))}
-          </ul>
-        </DetailSection>
-
-        <DetailSection title="자격 요건">
-          <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {detail.requirements.map((r, i) => (
-              <li key={i} style={{ fontSize: tokens.fontSizes.sm, color: D.body, lineHeight: 1.6 }}>{r}</li>
-            ))}
-          </ul>
-        </DetailSection>
-
-        <DetailSection title="우대 사항">
-          <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {detail.preferred.map((r, i) => (
-              <li key={i} style={{ fontSize: tokens.fontSizes.sm, color: D.body, lineHeight: 1.6 }}>{r}</li>
-            ))}
-          </ul>
-        </DetailSection>
-
-        <DetailSection title="기술 스택">
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {job.tags.map(t => (
-              <span key={t} style={{ background: D.tag, color: D.tagText, padding: '4px 10px', borderRadius: 999, fontSize: tokens.fontSizes.xs, fontWeight: 500, border: `1px solid ${D.border}` }}>{t}</span>
-            ))}
-          </div>
-        </DetailSection>
-
-        <DetailSection title="복리후생">
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {detail.benefits.map((b, i) => (
-              <span key={i} style={{ background: 'rgba(16,185,129,0.08)', color: '#34d399', padding: '4px 10px', borderRadius: 999, fontSize: tokens.fontSizes.xs, fontWeight: 500, border: '1px solid rgba(16,185,129,0.15)' }}>{b}</span>
-            ))}
-          </div>
-        </DetailSection>
+        {job.tags.length > 0 && (
+          <DetailSection title="기술 스택">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {job.tags.map(t => (
+                <span key={t} style={{ background: D.tag, color: D.tagText, padding: '4px 10px', borderRadius: 999, fontSize: tokens.fontSizes.xs, fontWeight: 500, border: `1px solid ${D.border}` }}>{t}</span>
+              ))}
+            </div>
+          </DetailSection>
+        )}
 
         <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted, paddingTop: 4 }}>
           등록일: {job.posted}

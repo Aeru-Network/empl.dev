@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { tokens } from '../tokens';
 import { type ProfileData } from '../data/defaultData';
-import { HeartIcon, EyeIcon, ClockIcon, ArrowLeftIcon } from '../components/Icons';
+import { HeartIcon, EyeIcon, ClockIcon, ArrowLeftIcon, SendIcon } from '../components/Icons';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 
 interface PostDetailProps {
@@ -10,27 +10,69 @@ interface PostDetailProps {
   onBack: () => void;
 }
 
+interface Comment {
+  id: string;
+  author: string;
+  avatar: string;
+  text: string;
+  date: string;
+  liked: boolean;
+  likes: number;
+}
+
 const D = {
-  bg: '#000', border: 'rgba(255,255,255,0.08)',
+  bg: '#000', card: '#0a0a0a', border: 'rgba(255,255,255,0.08)',
+  borderFocus: 'rgba(255,255,255,0.22)',
   heading: '#fff', body: '#a1a1aa', muted: '#52525b',
-  accent: '#0070f3', tag: 'rgba(255,255,255,0.07)', tagText: '#a1a1aa',
+  accent: '#0070f3', accentDim: 'rgba(0,112,243,0.12)',
+  tag: 'rgba(255,255,255,0.07)', tagText: '#a1a1aa',
+  input: '#0f0f0f',
 };
 
 const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
   const post = profile?.posts.find(p => p.id === postId) ?? null;
   const [liked, setLiked] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentText, setCommentText] = useState('');
+  const sendLock = React.useRef(false);
 
   if (!profile || !post) {
     return (
       <div style={{ background: D.bg, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', color: D.muted }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}>📄</div>
           <div style={{ fontSize: '16px', fontWeight: 600, color: D.body, marginBottom: 8 }}>포스트를 찾을 수 없습니다</div>
           <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#5b9cf6', cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600 }}>← 돌아가기</button>
         </div>
       </div>
     );
   }
+
+  const submitComment = () => {
+    const text = commentText.trim();
+    if (!text || sendLock.current) return;
+    sendLock.current = true;
+    const now = new Date();
+    setComments(prev => [
+      ...prev,
+      {
+        id: 'c' + Date.now(),
+        author: profile.name || '나',
+        avatar: profile.avatar || '',
+        text,
+        date: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`,
+        liked: false,
+        likes: 0,
+      },
+    ]);
+    setCommentText('');
+    sendLock.current = false;
+  };
+
+  const toggleCommentLike = (id: string) => {
+    setComments(prev => prev.map(c =>
+      c.id === id ? { ...c, liked: !c.liked, likes: c.likes + (c.liked ? -1 : 1) } : c
+    ));
+  };
 
   return (
     <div style={{ background: D.bg, minHeight: '100vh' }}>
@@ -42,7 +84,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
           style={{
             display: 'flex', alignItems: 'center', gap: 7, background: 'none', border: 'none',
             color: D.muted, fontSize: tokens.fontSizes.sm, cursor: 'pointer', padding: 0, marginBottom: 36,
-            transition: `color ${tokens.transitions.fast}`,
+            transition: `color ${tokens.transitions.fast}`, fontFamily: 'inherit',
           }}
           onMouseEnter={e => (e.currentTarget.style.color = D.body)}
           onMouseLeave={e => (e.currentTarget.style.color = D.muted)}
@@ -50,35 +92,31 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
           <ArrowLeftIcon size={15} color="currentColor" /> 뒤로가기
         </button>
 
-        {/* Tags */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 18 }}>
-          {post.tags.map(tag => (
-            <span key={tag} style={{ background: D.tag, color: D.tagText, padding: '4px 11px', borderRadius: 999, fontSize: tokens.fontSizes.xs, fontWeight: 500, border: `1px solid ${D.border}` }}>
-              {tag}
-            </span>
-          ))}
-        </div>
-
         {/* Title */}
         <h1 style={{
           fontSize: 'clamp(26px, 4.5vw, 44px)', fontWeight: 800, color: D.heading,
-          margin: '0 0 22px', lineHeight: 1.2, letterSpacing: '-1px',
+          margin: '0 0 16px', lineHeight: 1.2, letterSpacing: '-1px',
         }}>
           {post.title}
         </h1>
+
+        {/* Tags — under title */}
+        {post.tags.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 24 }}>
+            {post.tags.map(tag => (
+              <span key={tag} style={{ background: D.tag, color: D.tagText, padding: '4px 11px', borderRadius: 999, fontSize: tokens.fontSizes.xs, fontWeight: 500, border: `1px solid ${D.border}` }}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Author + meta */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
           paddingBottom: 24, marginBottom: 36, borderBottom: `1px solid ${D.border}`,
         }}>
-          {profile.avatar ? (
-            <img src={profile.avatar} alt={profile.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-          ) : (
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#1a56db,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 16, fontWeight: 700, flexShrink: 0 }}>
-              {profile.name?.[0] ?? '?'}
-            </div>
-          )}
+          <AuthorAvatar profile={profile} size={40} fontSize={16} />
           <div>
             <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading }}>{profile.name}</div>
             <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted, marginTop: 2 }}>{post.date}</div>
@@ -93,7 +131,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
         {/* Content */}
         <MarkdownRenderer content={post.content} />
 
-        {/* Footer */}
+        {/* Footer actions */}
         <div style={{
           marginTop: 52, paddingTop: 28, borderTop: `1px solid ${D.border}`,
           display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
@@ -102,7 +140,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
             onClick={() => setLiked(v => !v)}
             style={{
               display: 'flex', alignItems: 'center', gap: 7,
-              padding: '9px 18px', borderRadius: 8, cursor: 'pointer',
+              padding: '9px 18px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
               border: `1px solid ${liked ? 'rgba(239,68,68,0.4)' : D.border}`,
               background: liked ? 'rgba(239,68,68,0.08)' : 'transparent',
               color: liked ? '#f87171' : D.body,
@@ -113,14 +151,12 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
             <HeartIcon size={15} color={liked ? '#f87171' : D.body} />
             {post.likes + (liked ? 1 : 0)} 좋아요
           </button>
-
           <div style={{ flex: 1 }} />
-
           <button
             onClick={onBack}
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
-              padding: '9px 16px', borderRadius: 8, cursor: 'pointer',
+              padding: '9px 16px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
               border: `1px solid ${D.border}`, background: 'transparent',
               color: D.muted, fontSize: tokens.fontSizes.sm, fontWeight: 500,
               transition: `all ${tokens.transitions.fast}`,
@@ -131,22 +167,139 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
         </div>
 
         {/* Author card */}
-        <div style={{ marginTop: 40, padding: '22px 24px', borderRadius: 12, border: `1px solid ${D.border}`, background: '#0a0a0a', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-          {profile.avatar ? (
-            <img src={profile.avatar} alt={profile.name} style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-          ) : (
-            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#1a56db,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 20, fontWeight: 700, flexShrink: 0 }}>
-              {profile.name?.[0] ?? '?'}
-            </div>
-          )}
+        <div style={{ marginTop: 40, padding: '22px 24px', borderRadius: 12, border: `1px solid ${D.border}`, background: D.card, display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+          <AuthorAvatar profile={profile} size={52} fontSize={20} />
           <div>
             <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 700, color: D.heading, marginBottom: 4 }}>{profile.name}</div>
             <div style={{ fontSize: tokens.fontSizes.xs, color: D.body, lineHeight: 1.6 }}>{profile.headline}</div>
-            {profile.bio && <p style={{ fontSize: tokens.fontSizes.xs, color: D.muted, margin: '8px 0 0', lineHeight: 1.65 }}>{profile.bio.slice(0, 100)}{profile.bio.length > 100 ? '...' : ''}</p>}
+            {profile.bio && (
+              <p style={{ fontSize: tokens.fontSizes.xs, color: D.muted, margin: '8px 0 0', lineHeight: 1.65 }}>
+                {profile.bio.slice(0, 100)}{profile.bio.length > 100 ? '...' : ''}
+              </p>
+            )}
           </div>
         </div>
 
+        {/* ── Comments ── */}
+        <div style={{ marginTop: 48 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+            <h2 style={{ fontSize: tokens.fontSizes.md, fontWeight: 700, color: D.heading, margin: 0 }}>댓글</h2>
+            {comments.length > 0 && (
+              <span style={{ fontSize: tokens.fontSizes.xs, color: D.muted, background: 'rgba(255,255,255,0.06)', border: `1px solid ${D.border}`, borderRadius: 999, padding: '2px 8px' }}>
+                {comments.length}
+              </span>
+            )}
+          </div>
+
+          {/* Comment input */}
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 32 }}>
+            <AuthorAvatar profile={profile} size={36} fontSize={14} />
+            <div style={{ flex: 1 }}>
+              <textarea
+                value={commentText}
+                onChange={e => setCommentText(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submitComment(); } }}
+                placeholder="댓글을 작성하세요... (Ctrl+Enter로 게시)"
+                rows={3}
+                style={{
+                  width: '100%', boxSizing: 'border-box',
+                  background: D.input, border: `1px solid ${D.border}`,
+                  borderRadius: 10, padding: '12px 14px',
+                  fontSize: tokens.fontSizes.sm, color: D.heading,
+                  fontFamily: 'inherit', resize: 'vertical', outline: 'none',
+                  lineHeight: 1.6, transition: `border-color ${tokens.transitions.fast}`,
+                }}
+                onFocus={e => (e.target.style.borderColor = D.borderFocus)}
+                onBlur={e => (e.target.style.borderColor = D.border)}
+              />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+                <button
+                  type="button"
+                  onClick={submitComment}
+                  disabled={!commentText.trim()}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '8px 16px', borderRadius: 8, fontFamily: 'inherit',
+                    border: 'none', cursor: commentText.trim() ? 'pointer' : 'not-allowed',
+                    background: commentText.trim() ? D.accent : 'rgba(255,255,255,0.06)',
+                    color: commentText.trim() ? '#fff' : D.muted,
+                    fontSize: tokens.fontSizes.sm, fontWeight: 600,
+                    transition: `all ${tokens.transitions.fast}`,
+                  }}
+                >
+                  <SendIcon size={13} color={commentText.trim() ? '#fff' : D.muted} />
+                  게시
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Comment list */}
+          {comments.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 0', borderTop: `1px solid ${D.border}` }}>
+              <div style={{ fontSize: tokens.fontSizes.sm, color: D.muted }}>아직 댓글이 없어요. 첫 댓글을 남겨보세요!</div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0, borderTop: `1px solid ${D.border}` }}>
+              {comments.map((c, idx) => (
+                <div key={c.id} style={{
+                  display: 'flex', gap: 12, padding: '20px 0',
+                  borderBottom: idx < comments.length - 1 ? `1px solid ${D.border}` : 'none',
+                }}>
+                  <CommentAvatar author={c.author} avatar={c.avatar} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <span style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading }}>{c.author}</span>
+                      <span style={{ fontSize: tokens.fontSizes.xs, color: D.muted }}>{c.date}</span>
+                    </div>
+                    <p style={{ fontSize: tokens.fontSizes.sm, color: D.body, margin: '0 0 10px', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+                      {c.text}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => toggleCommentLike(c.id)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 4,
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        color: c.liked ? '#f87171' : D.muted,
+                        fontSize: tokens.fontSizes.xs, fontWeight: 500,
+                        fontFamily: 'inherit', padding: 0,
+                        transition: `color ${tokens.transitions.fast}`,
+                      }}
+                    >
+                      <HeartIcon size={12} color={c.liked ? '#f87171' : D.muted} />
+                      {c.likes > 0 ? c.likes : '좋아요'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
       </div>
+    </div>
+  );
+};
+
+const AuthorAvatar: React.FC<{ profile: ProfileData; size: number; fontSize: number }> = ({ profile, size, fontSize }) => {
+  if (profile.avatar) {
+    return <img src={profile.avatar} alt={profile.name} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />;
+  }
+  return (
+    <div style={{ width: size, height: size, borderRadius: '50%', background: 'linear-gradient(135deg,#1a56db,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize, fontWeight: 700, flexShrink: 0 }}>
+      {profile.name?.[0] ?? '?'}
+    </div>
+  );
+};
+
+const CommentAvatar: React.FC<{ author: string; avatar: string }> = ({ author, avatar }) => {
+  if (avatar) {
+    return <img src={avatar} alt={author} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />;
+  }
+  return (
+    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#1a56db,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
+      {author?.[0] ?? '?'}
     </div>
   );
 };

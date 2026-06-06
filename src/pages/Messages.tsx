@@ -32,71 +32,8 @@ interface Conversation {
   lastReadMsgId: string | null;
 }
 
-const SAMPLE: Conversation[] = [
-  {
-    id: 'c1',
-    name: '이서연',
-    headline: 'iOS Engineer · Swift & SwiftUI',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=seoyeon&backgroundColor=ffd5dc',
-    lastMessage: '코드 리뷰 부탁드려도 될까요?',
-    timestamp: '방금',
-    unread: 2,
-    lastReadMsgId: 'm3',
-    messages: [
-      { id: 'm1', text: '안녕하세요! 김민준님 오픈소스 프로젝트 잘 보고 있어요 🙌', from: 'them', time: '14:31' },
-      { id: 'm2', text: '혹시 DevFlow CLI PR 리뷰 부탁드려도 될까요?', from: 'them', time: '14:32' },
-      { id: 'm3', text: '아 물론이죠! PR 링크 공유해 주세요.', from: 'me', time: '14:45' },
-      { id: 'm4', text: '감사합니다 ☺️ 코드 리뷰 부탁드려도 될까요?', from: 'them', time: '15:02' },
-    ],
-  },
-  {
-    id: 'c2',
-    name: '박도현',
-    headline: 'ML Engineer · LLM & Computer Vision',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=dohyun&backgroundColor=c0aede',
-    lastMessage: 'LangChain 관련해서 여쭤봐도 될까요?',
-    timestamp: '1시간 전',
-    unread: 0,
-    lastReadMsgId: 'm2',
-    messages: [
-      { id: 'm1', text: 'QueryPilot 정말 인상적이에요! PostgreSQL 인덱스 최적화 부분 특히요.', from: 'them', time: '10:12' },
-      { id: 'm2', text: '감사합니다! 어떤 부분이 제일 도움이 됐나요?', from: 'me', time: '10:18' },
-      { id: 'm3', text: 'EXPLAIN ANALYZE 시각화 부분이요. LangChain 관련해서 여쭤봐도 될까요?', from: 'them', time: '10:23' },
-    ],
-  },
-  {
-    id: 'c3',
-    name: 'Toss HR',
-    headline: '인사팀 · 개발자 채용 담당',
-    avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Toss&backgroundColor=0064ff',
-    lastMessage: '포지션 관련 문의드립니다.',
-    timestamp: '어제',
-    unread: 1,
-    lastReadMsgId: null,
-    messages: [
-      { id: 'm1', text: '안녕하세요, 김민준님! Toss 채용팀입니다.', from: 'them', time: '어제 16:30' },
-      { id: 'm2', text: 'Senior Frontend Engineer 포지션 관련 문의드립니다. 관심 있으신가요?', from: 'them', time: '어제 16:31' },
-    ],
-  },
-  {
-    id: 'c4',
-    name: '한재원',
-    headline: 'Backend Engineer · Go & Distributed Systems',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jaewon&backgroundColor=a8e6cf',
-    lastMessage: '다음 달에 오픈소스 컨퍼런스 가시나요?',
-    timestamp: '3일 전',
-    unread: 0,
-    lastReadMsgId: 'm2',
-    messages: [
-      { id: 'm1', text: 'RealtimeSync OT 구현 보니까 대박이네요. 어떻게 그걸 혼자 구현하셨어요?', from: 'them', time: '3일 전' },
-      { id: 'm2', text: '2주 정도 논문 읽으면서 구현했어요 ㅎㅎ', from: 'me', time: '3일 전' },
-      { id: 'm3', text: '다음 달에 오픈소스 컨퍼런스 가시나요?', from: 'them', time: '3일 전' },
-    ],
-  },
-];
-
 const Messages: React.FC = () => {
-  const [conversations, setConversations] = useState<Conversation[]>(SAMPLE);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 700);
