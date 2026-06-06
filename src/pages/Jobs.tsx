@@ -102,18 +102,20 @@ const Jobs: React.FC = () => {
         {/* List */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Type filter */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: 20, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '6px', marginBottom: 20, flexWrap: 'wrap', background: '#0a0a0a', border: `1px solid ${D.border}`, borderRadius: 10, padding: 4, width: 'fit-content' }}>
             {TYPES.map(t => (
               <button
                 key={t}
                 onClick={() => setTypeFilter(t)}
                 style={{
-                  border: `1px solid ${typeFilter === t ? 'rgba(0,112,243,0.5)' : D.border}`,
-                  background: typeFilter === t ? D.accentDim : 'transparent',
-                  color: typeFilter === t ? '#5b9cf6' : D.body,
-                  borderRadius: 999, padding: '5px 16px',
-                  fontSize: tokens.fontSizes.xs, fontWeight: 500, cursor: 'pointer',
+                  border: 'none',
+                  background: typeFilter === t ? '#1a1a1a' : 'transparent',
+                  color: typeFilter === t ? D.heading : D.muted,
+                  borderRadius: 7, padding: '6px 14px',
+                  fontSize: tokens.fontSizes.xs, fontWeight: typeFilter === t ? 600 : 400,
+                  cursor: 'pointer', fontFamily: 'inherit',
                   transition: `all ${tokens.transitions.fast}`,
+                  outline: typeFilter === t ? `1px solid ${D.border}` : 'none',
                 }}
               >
                 {TYPE_LABELS[t]}
@@ -146,9 +148,8 @@ const Jobs: React.FC = () => {
 
           {filtered.length === 0 && (
             <div style={{ textAlign: 'center', padding: '80px 20px', color: D.muted }}>
-              <div style={{ fontSize: 36, marginBottom: 12 }}>📋</div>
-              <div style={{ fontSize: tokens.fontSizes.md, fontWeight: 600, color: D.body }}>검색 결과가 없습니다</div>
-              <div style={{ fontSize: tokens.fontSizes.sm, marginTop: 6 }}>다른 검색어나 필터를 시도해보세요</div>
+              <div style={{ fontSize: tokens.fontSizes.md, fontWeight: 600, color: D.body, marginBottom: 6 }}>검색 결과가 없습니다</div>
+              <div style={{ fontSize: tokens.fontSizes.sm, color: D.muted }}>다른 검색어나 필터를 시도해보세요</div>
             </div>
           )}
         </div>
