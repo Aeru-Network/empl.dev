@@ -182,10 +182,9 @@ const Explore: React.FC<ExploreProps> = ({ onNavigate }) => {
 
         {filtered.length === 0 && (
           <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-            <div style={{ fontSize: 40, marginBottom: 14 }}>🔍</div>
             <div style={{ fontSize: tokens.fontSizes.md, fontWeight: 600, color: D.body, marginBottom: 6 }}>검색 결과가 없습니다</div>
             <div style={{ fontSize: tokens.fontSizes.sm, color: D.muted, marginBottom: 16 }}>다른 키워드나 스킬 필터를 시도해보세요</div>
-            <button onClick={clearFilters} style={{ background: '#fff', color: '#000', border: 'none', borderRadius: 8, padding: '9px 20px', fontSize: tokens.fontSizes.sm, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+            <button onClick={clearFilters} style={{ background: '#1a1a1a', color: D.body, border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '9px 20px', fontSize: tokens.fontSizes.sm, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
               필터 초기화
             </button>
           </div>
