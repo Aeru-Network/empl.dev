@@ -15,7 +15,6 @@ import CompanyView from './pages/CompanyView';
 import CompanyManage from './pages/CompanyManage';
 import Messages from './pages/Messages';
 import {
-  sampleCompanies,
   type ProfileData,
   type Company,
 } from './data/defaultData';
@@ -44,6 +43,8 @@ const PAGES_WITH_NAV: Page[] = [
 const PROFILE_KEY = 'empl.profile';
 const COMPANIES_KEY = 'empl.companies';
 const LOGGED_KEY = 'empl.loggedIn';
+const COMPANIES_VER_KEY = 'empl.companiesVer';
+const COMPANIES_VER = '2';
 
 function loadProfile(): ProfileData | null {
   try {
@@ -56,10 +57,15 @@ function loadProfile(): ProfileData | null {
 
 function loadCompanies(): Company[] {
   try {
+    if (localStorage.getItem(COMPANIES_VER_KEY) !== COMPANIES_VER) {
+      localStorage.removeItem(COMPANIES_KEY);
+      localStorage.setItem(COMPANIES_VER_KEY, COMPANIES_VER);
+      return [];
+    }
     const raw = localStorage.getItem(COMPANIES_KEY);
-    return raw ? (JSON.parse(raw) as Company[]) : sampleCompanies;
+    return raw ? (JSON.parse(raw) as Company[]) : [];
   } catch {
-    return sampleCompanies;
+    return [];
   }
 }
 

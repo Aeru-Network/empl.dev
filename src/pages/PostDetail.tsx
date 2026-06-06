@@ -100,21 +100,10 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
           {post.title}
         </h1>
 
-        {/* Tags — under title */}
-        {post.tags.length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 24 }}>
-            {post.tags.map(tag => (
-              <span key={tag} style={{ background: D.tag, color: D.tagText, padding: '4px 11px', borderRadius: 999, fontSize: tokens.fontSizes.xs, fontWeight: 500, border: `1px solid ${D.border}` }}>
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
         {/* Author + meta */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
-          paddingBottom: 24, marginBottom: 36, borderBottom: `1px solid ${D.border}`,
+          paddingBottom: 20, marginBottom: 18,
         }}>
           <AuthorAvatar profile={profile} size={40} fontSize={16} />
           <div>
@@ -127,6 +116,17 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
             <MetaChip icon={<HeartIcon size={13} color={D.muted} />} label={String(post.likes + (liked ? 1 : 0))} />
           </div>
         </div>
+
+        {/* Tags — under author */}
+        {post.tags.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 36, paddingBottom: 36, borderBottom: `1px solid ${D.border}` }}>
+            {post.tags.map(tag => (
+              <span key={tag} style={{ background: D.tag, color: D.tagText, padding: '4px 11px', borderRadius: 999, fontSize: tokens.fontSizes.xs, fontWeight: 500, border: `1px solid ${D.border}` }}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Content */}
         <MarkdownRenderer content={post.content} />
@@ -198,7 +198,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
               <textarea
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submitComment(); } }}
+                onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !e.nativeEvent.isComposing) { e.preventDefault(); submitComment(); } }}
                 placeholder="댓글을 작성하세요... (Ctrl+Enter로 게시)"
                 rows={3}
                 style={{

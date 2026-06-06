@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { tokens } from '../tokens';
-import { SendIcon, ArrowLeftIcon } from '../components/Icons';
+import { SendIcon, ArrowLeftIcon, PencilIcon, CloseIcon } from '../components/Icons';
 
 const D = {
   bg: '#000', sidebar: '#0a0a0a', card: '#0f0f0f',
@@ -37,8 +37,13 @@ const Messages: React.FC = () => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 700);
+  const [showNewMsg, setShowNewMsg] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newHeadline, setNewHeadline] = useState('');
+  const [newFirstMsg, setNewFirstMsg] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
   const sendLock = useRef(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const active = conversations.find(c => c.id === activeId) ?? null;
 
@@ -51,6 +56,10 @@ const Messages: React.FC = () => {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [active?.messages.length]);
+
+  useEffect(() => {
+    if (showNewMsg) setTimeout(() => nameInputRef.current?.focus(), 50);
+  }, [showNewMsg]);
 
   const openConversation = (id: string) => {
     setConversations(prev => prev.map(c => c.id === id ? { ...c, unread: 0 } : c));
@@ -79,9 +88,135 @@ const Messages: React.FC = () => {
     }, 1500);
   };
 
+  const startNewConversation = () => {
+    const name = newName.trim();
+    const firstText = newFirstMsg.trim();
+    if (!name) return;
+    const now = new Date();
+    const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const cid = 'conv-' + Date.now();
+    const messages: Message[] = firstText
+      ? [{ id: 'm' + Date.now(), text: firstText, from: 'me', time }]
+      : [];
+    const newConv: Conversation = {
+      id: cid,
+      name,
+      headline: newHeadline.trim() || '',
+      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=1a56db`,
+      lastMessage: firstText || '',
+      timestamp: firstText ? '방금' : '',
+      unread: 0,
+      messages,
+      lastReadMsgId: messages.length ? messages[0].id : null,
+    };
+    setConversations(prev => [newConv, ...prev]);
+    setActiveId(cid);
+    setShowNewMsg(false);
+    setNewName('');
+    setNewHeadline('');
+    setNewFirstMsg('');
+  };
+
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
+
+  const handleNewMsgKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) startNewConversation();
+    if (e.key === 'Escape') setShowNewMsg(false);
+  };
+
+  /* ── New Message Modal ── */
+  const newMsgModal = showNewMsg && (
+    <div
+      style={{
+        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 1000, padding: 20,
+      }}
+      onClick={e => { if (e.target === e.currentTarget) setShowNewMsg(false); }}
+    >
+      <div style={{
+        background: '#0f0f0f', border: `1px solid ${D.border}`,
+        borderRadius: 16, padding: '24px', width: '100%', maxWidth: 400,
+        animation: 'fadeUp 0.2s ease',
+      }}>
+        <style>{`@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }`}</style>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h3 style={{ margin: 0, fontSize: tokens.fontSizes.md, fontWeight: 700, color: D.heading }}>새 메시지</h3>
+          <button onClick={() => setShowNewMsg(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+            <CloseIcon size={16} color={D.muted} />
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <label style={{ fontSize: tokens.fontSizes.xs, color: D.muted, fontWeight: 600, display: 'block', marginBottom: 6 }}>받는 사람 *</label>
+            <input
+              ref={nameInputRef}
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              onKeyDown={handleNewMsgKey}
+              placeholder="이름을 입력하세요"
+              style={{
+                width: '100%', background: D.input, border: `1px solid rgba(255,255,255,0.1)`,
+                borderRadius: 8, padding: '10px 12px', fontSize: tokens.fontSizes.sm,
+                color: D.heading, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
+              }}
+              onFocus={e => (e.target.style.borderColor = 'rgba(255,255,255,0.25)')}
+              onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: tokens.fontSizes.xs, color: D.muted, fontWeight: 600, display: 'block', marginBottom: 6 }}>직함 (선택)</label>
+            <input
+              value={newHeadline}
+              onChange={e => setNewHeadline(e.target.value)}
+              onKeyDown={handleNewMsgKey}
+              placeholder="예: Frontend Engineer"
+              style={{
+                width: '100%', background: D.input, border: `1px solid rgba(255,255,255,0.1)`,
+                borderRadius: 8, padding: '10px 12px', fontSize: tokens.fontSizes.sm,
+                color: D.heading, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
+              }}
+              onFocus={e => (e.target.style.borderColor = 'rgba(255,255,255,0.25)')}
+              onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: tokens.fontSizes.xs, color: D.muted, fontWeight: 600, display: 'block', marginBottom: 6 }}>첫 메시지 (선택)</label>
+            <textarea
+              value={newFirstMsg}
+              onChange={e => setNewFirstMsg(e.target.value)}
+              placeholder="안녕하세요!"
+              rows={3}
+              style={{
+                width: '100%', background: D.input, border: `1px solid rgba(255,255,255,0.1)`,
+                borderRadius: 8, padding: '10px 12px', fontSize: tokens.fontSizes.sm,
+                color: D.heading, fontFamily: 'inherit', outline: 'none', resize: 'none',
+                boxSizing: 'border-box', lineHeight: 1.5,
+              }}
+              onFocus={e => (e.target.style.borderColor = 'rgba(255,255,255,0.25)')}
+              onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+            />
+          </div>
+          <button
+            onClick={startNewConversation}
+            disabled={!newName.trim()}
+            style={{
+              width: '100%', padding: '12px', borderRadius: 9, border: 'none',
+              background: newName.trim() ? D.accent : 'rgba(255,255,255,0.06)',
+              color: newName.trim() ? '#fff' : D.muted,
+              fontSize: tokens.fontSizes.sm, fontWeight: 700, cursor: newName.trim() ? 'pointer' : 'default',
+              fontFamily: 'inherit', transition: 'all 0.15s',
+            }}
+          >
+            대화 시작하기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   /* ── Sidebar ── */
   const sidebar = (
@@ -91,10 +226,38 @@ const Messages: React.FC = () => {
       background: D.sidebar, display: 'flex', flexDirection: 'column',
       height: '100%',
     }}>
-      <div style={{ padding: '20px 20px 14px', borderBottom: `1px solid ${D.border}` }}>
+      <div style={{ padding: '20px 20px 14px', borderBottom: `1px solid ${D.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontSize: tokens.fontSizes.lg, fontWeight: 800, color: D.heading, margin: 0, letterSpacing: '-0.4px' }}>메시지</h2>
+        <button
+          onClick={() => setShowNewMsg(true)}
+          title="새 메시지"
+          style={{
+            background: 'rgba(255,255,255,0.06)', border: `1px solid ${D.border}`,
+            borderRadius: 8, width: 34, height: 34, display: 'flex', alignItems: 'center',
+            justifyContent: 'center', cursor: 'pointer', transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+        >
+          <PencilIcon size={14} color={D.body} />
+        </button>
       </div>
       <div style={{ overflowY: 'auto', flex: 1 }}>
+        {conversations.length === 0 && (
+          <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+            <div style={{ fontSize: tokens.fontSizes.sm, color: D.muted, marginBottom: 14 }}>아직 대화가 없어요</div>
+            <button
+              onClick={() => setShowNewMsg(true)}
+              style={{
+                background: D.accent, color: '#fff', border: 'none',
+                borderRadius: 8, padding: '9px 16px', fontSize: tokens.fontSizes.xs,
+                fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              새 메시지 작성
+            </button>
+          </div>
+        )}
         {conversations.map(conv => (
           <button
             key={conv.id}
@@ -123,7 +286,7 @@ const Messages: React.FC = () => {
                 <span style={{ fontSize: 10, color: D.muted, flexShrink: 0, marginLeft: 6 }}>{conv.timestamp}</span>
               </div>
               <div style={{ fontSize: tokens.fontSizes.xs, color: conv.unread > 0 ? D.body : D.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {conv.lastMessage}
+                {conv.lastMessage || '대화를 시작해보세요'}
               </div>
             </div>
           </button>
@@ -145,12 +308,19 @@ const Messages: React.FC = () => {
         <img src={active.avatar} alt={active.name} style={{ width: 38, height: 38, borderRadius: '50%' }} />
         <div>
           <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 700, color: D.heading }}>{active.name}</div>
-          <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted }}>{active.headline}</div>
+          {active.headline && <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted }}>{active.headline}</div>}
         </div>
       </div>
 
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 8px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {active.messages.length === 0 && (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 0' }}>
+            <div style={{ textAlign: 'center', color: D.muted, fontSize: tokens.fontSizes.sm }}>
+              {active.name}님께 첫 메시지를 보내보세요
+            </div>
+          </div>
+        )}
         {active.messages.map((msg, idx) => {
           const isMe = msg.from === 'me';
           const prevFrom = idx > 0 ? active.messages[idx - 1].from : null;
@@ -219,28 +389,37 @@ const Messages: React.FC = () => {
       </div>
     </div>
   ) : (
-    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>💬</div>
-        <div style={{ fontSize: tokens.fontSizes.md, fontWeight: 600, color: D.heading, marginBottom: 8 }}>메시지를 선택하세요</div>
-        <div style={{ fontSize: tokens.fontSizes.sm, color: D.muted }}>왼쪽에서 대화를 선택하면 메시지를 볼 수 있어요.</div>
-      </div>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
+      <div style={{ fontSize: tokens.fontSizes.md, fontWeight: 600, color: D.body }}>대화를 선택하거나 새 메시지를 작성하세요</div>
+      <button
+        onClick={() => setShowNewMsg(true)}
+        style={{
+          background: D.accent, color: '#fff', border: 'none',
+          borderRadius: 9, padding: '11px 22px', fontSize: tokens.fontSizes.sm,
+          fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+        }}
+      >
+        새 메시지 작성
+      </button>
     </div>
   );
 
   const NAV_H = 56;
 
   return (
-    <div style={{ height: `calc(100vh - ${NAV_H}px)`, background: D.bg, display: 'flex', overflow: 'hidden' }}>
-      {isMobile ? (
-        activeId ? thread : sidebar
-      ) : (
-        <>
-          {sidebar}
-          {thread}
-        </>
-      )}
-    </div>
+    <>
+      {newMsgModal}
+      <div style={{ height: `calc(100vh - ${NAV_H}px)`, background: D.bg, display: 'flex', overflow: 'hidden' }}>
+        {isMobile ? (
+          activeId ? thread : sidebar
+        ) : (
+          <>
+            {sidebar}
+            {thread}
+          </>
+        )}
+      </div>
+    </>
   );
 };
 

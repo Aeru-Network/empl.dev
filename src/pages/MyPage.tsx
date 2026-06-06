@@ -65,13 +65,6 @@ const MyPage: React.FC<MyPageProps> = ({ profile, companies, onNavigate, onIniti
   const today = new Date();
   const greeting = today.getHours() < 12 ? '좋은 아침이에요' : today.getHours() < 18 ? '안녕하세요' : '안녕하세요';
 
-  const stats = [
-    { label: '팔로워', value: profile.followers.toLocaleString(), color: '#5b9cf6' },
-    { label: '팔로잉', value: profile.following.toLocaleString(), color: '#a78bfa' },
-    { label: '포스트', value: String(profile.posts.length), color: '#34d399' },
-    { label: '프로젝트', value: String(profile.projects.length), color: '#fb923c' },
-  ];
-
   const quickActions = [
     { label: '내 프로필', desc: '프로필 보기 및 편집', icon: <UserIcon size={20} color="#5b9cf6" />, color: '#0070f3', onClick: () => onNavigate('profile') },
     { label: '개발자 탐색', desc: '다른 개발자 찾기', icon: <SearchIcon size={20} color="#34d399" />, color: '#10b981', onClick: () => onNavigate('explore') },
@@ -103,15 +96,6 @@ const MyPage: React.FC<MyPageProps> = ({ profile, companies, onNavigate, onIniti
           </button>
         </div>
 
-        {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
-          {stats.map(s => (
-            <div key={s.label} style={{ background: D.card, borderRadius: 10, border: `1px solid ${D.border}`, padding: '16px 18px', textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 800, color: s.color, letterSpacing: '-0.5px', marginBottom: 2 }}>{s.value}</div>
-              <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
 
         {/* Quick actions */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginBottom: 16 }}>
