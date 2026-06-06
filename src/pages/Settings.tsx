@@ -319,6 +319,31 @@ const ExperienceEditor: React.FC<{ experiences: Experience[]; onChange: (exps: E
   );
 };
 
+const YEARS = Array.from({ length: new Date().getFullYear() - 1979 }, (_, i) => String(new Date().getFullYear() - i));
+const MONTHS = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+
+function parsePeriod(period: string) {
+  const parts = period.split(/\s*[–\-]\s*/);
+  const [start = '', end = ''] = parts;
+  const [sy = '', sm = ''] = start.split('.');
+  const isCurrent = end.trim() === '현재';
+  const [ey = '', em = ''] = isCurrent ? ['', ''] : end.split('.');
+  return { sy, sm: sm.padStart(2, '0'), isCurrent, ey, em: em.padStart(2, '0') };
+}
+
+function buildPeriod(sy: string, sm: string, isCurrent: boolean, ey: string, em: string) {
+  const s = sy ? (sm ? `${sy}.${sm}` : sy) : '';
+  const e = isCurrent ? '현재' : (ey ? (em ? `${ey}.${em}` : ey) : '');
+  if (!s && !e) return '';
+  if (!e) return s;
+  if (!s) return e;
+  return `${s} – ${e}`;
+}
+
+const selectStyle: React.CSSProperties = {
+  ...inputBase, flex: 1, padding: '10px 8px', cursor: 'pointer', appearance: 'none' as const,
+};
+
 const ExpForm: React.FC<{
   draft: Omit<Experience, 'id'>;
   onChange: (d: Omit<Experience, 'id'>) => void;
@@ -326,25 +351,92 @@ const ExpForm: React.FC<{
   onCancel: () => void;
   focus: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   blur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-}> = ({ draft, onChange, onSave, onCancel, focus, blur }) => (
-  <div style={{ border: `1px solid ${D.borderFocus}`, borderRadius: 8, padding: '14px', display: 'flex', flexDirection: 'column', gap: 10, background: 'rgba(255,255,255,0.02)' }}>
-    <div style={{ display: 'flex', gap: 8 }}>
-      {(['work', 'education'] as const).map(type => (
-        <button key={type} onClick={() => onChange({ ...draft, type })} style={{ flex: 1, padding: '7px', borderRadius: 7, border: `1px solid ${draft.type === type ? D.accent : D.border}`, background: draft.type === type ? D.accentDim : 'none', color: draft.type === type ? D.accent : D.muted, fontSize: tokens.fontSizes.xs, fontWeight: 600, cursor: 'pointer' }}>
-          {type === 'work' ? '직장' : '학력'}
-        </button>
-      ))}
+}> = ({ draft, onChange, onSave, onCancel, focus, blur }) => {
+  const parsed = parsePeriod(draft.period);
+  const [sy, setSy] = useState(parsed.sy);
+  const [sm, setSm] = useState(parsed.sm);
+  const [isCurrent, setIsCurrent] = useState(parsed.isCurrent);
+  const [ey, setEy] = useState(parsed.ey);
+  const [em, setEm] = useState(parsed.em);
+
+  const updatePeriod = (nSy = sy, nSm = sm, nCurrent = isCurrent, nEy = ey, nEm = em) => {
+    onChange({ ...draft, period: buildPeriod(nSy, nSm, nCurrent, nEy, nEm) });
+  };
+
+  const toggleCurrent = () => {
+    const next = !isCurrent;
+    setIsCurrent(next);
+    if (next) { setEy(''); setEm(''); }
+    updatePeriod(sy, sm, next, next ? '' : ey, next ? '' : em);
+  };
+
+  const focusSel = (e: React.FocusEvent<HTMLSelectElement>) => (e.target.style.borderColor = D.borderFocus);
+  const blurSel = (e: React.FocusEvent<HTMLSelectElement>) => (e.target.style.borderColor = D.inputBorder);
+
+  return (
+    <div style={{ border: `1px solid ${D.borderFocus}`, borderRadius: 8, padding: '14px', display: 'flex', flexDirection: 'column', gap: 10, background: 'rgba(255,255,255,0.02)' }}>
+      <div style={{ display: 'flex', gap: 8 }}>
+        {(['work', 'education'] as const).map(type => (
+          <button key={type} onClick={() => onChange({ ...draft, type })} style={{ flex: 1, padding: '7px', borderRadius: 7, border: `1px solid ${draft.type === type ? D.accent : D.border}`, background: draft.type === type ? D.accentDim : 'none', color: draft.type === type ? D.accent : D.muted, fontSize: tokens.fontSizes.xs, fontWeight: 600, cursor: 'pointer' }}>
+            {type === 'work' ? '직장' : '학력'}
+          </button>
+        ))}
+      </div>
+      <input style={{ ...inputBase }} placeholder={draft.type === 'work' ? '직책 (예: Senior Engineer)' : '전공 / 학위'} value={draft.title} onChange={e => onChange({ ...draft, title: e.target.value })} onFocus={focus} onBlur={blur} />
+      <input style={{ ...inputBase }} placeholder={draft.type === 'work' ? '회사명' : '학교명'} value={draft.organization} onChange={e => onChange({ ...draft, organization: e.target.value })} onFocus={focus} onBlur={blur} />
+
+      {/* Period picker */}
+      <div>
+        <div style={{ ...labelStyle, marginBottom: 8 }}>기간</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <span style={{ fontSize: tokens.fontSizes.xs, color: D.muted, width: 28, flexShrink: 0 }}>시작</span>
+            <select value={sy} onChange={e => { setSy(e.target.value); updatePeriod(e.target.value, sm, isCurrent, ey, em); }} style={selectStyle} onFocus={focusSel} onBlur={blurSel}>
+              <option value="">연도</option>
+              {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+            <select value={sm} onChange={e => { setSm(e.target.value); updatePeriod(sy, e.target.value, isCurrent, ey, em); }} style={selectStyle} onFocus={focusSel} onBlur={blurSel}>
+              <option value="">월</option>
+              {MONTHS.map(m => <option key={m} value={m}>{m}월</option>)}
+            </select>
+          </div>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <span style={{ fontSize: tokens.fontSizes.xs, color: D.muted, width: 28, flexShrink: 0 }}>종료</span>
+            {isCurrent ? (
+              <div style={{ flex: 1, padding: '10px 12px', borderRadius: 8, border: `1px solid ${D.accent}`, background: D.accentDim, fontSize: tokens.fontSizes.sm, color: D.accent, fontWeight: 600 }}>
+                {draft.type === 'work' ? '현재 재직 중' : '현재 재학 중'}
+              </div>
+            ) : (
+              <>
+                <select value={ey} onChange={e => { setEy(e.target.value); updatePeriod(sy, sm, isCurrent, e.target.value, em); }} style={selectStyle} onFocus={focusSel} onBlur={blurSel}>
+                  <option value="">연도</option>
+                  {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
+                <select value={em} onChange={e => { setEm(e.target.value); updatePeriod(sy, sm, isCurrent, ey, e.target.value); }} style={selectStyle} onFocus={focusSel} onBlur={blurSel}>
+                  <option value="">월</option>
+                  {MONTHS.map(m => <option key={m} value={m}>{m}월</option>)}
+                </select>
+              </>
+            )}
+            <button
+              type="button"
+              onClick={toggleCurrent}
+              style={{ flexShrink: 0, padding: '8px 10px', borderRadius: 7, border: `1px solid ${isCurrent ? D.accent : D.border}`, background: isCurrent ? D.accentDim : 'none', color: isCurrent ? D.accent : D.muted, fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+            >
+              {isCurrent ? '종료일 입력' : (draft.type === 'work' ? '재직 중' : '재학 중')}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <textarea style={{ ...inputBase, resize: 'vertical', lineHeight: 1.6, minHeight: 70 }} placeholder="설명 (주요 업무, 성과 등)" value={draft.description} onChange={e => onChange({ ...draft, description: e.target.value })} onFocus={focus} onBlur={blur} />
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={onCancel} style={{ flex: 1, padding: '8px', borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', color: D.muted, fontSize: tokens.fontSizes.sm, cursor: 'pointer', fontWeight: 500 }}>취소</button>
+        <button onClick={onSave} style={{ flex: 2, padding: '8px', borderRadius: 7, border: 'none', background: '#fff', color: '#000', fontSize: tokens.fontSizes.sm, cursor: 'pointer', fontWeight: 700 }}>저장</button>
+      </div>
     </div>
-    <input style={{ ...inputBase }} placeholder={draft.type === 'work' ? '직책 (예: Senior Engineer)' : '전공 / 학위'} value={draft.title} onChange={e => onChange({ ...draft, title: e.target.value })} onFocus={focus} onBlur={blur} />
-    <input style={{ ...inputBase }} placeholder={draft.type === 'work' ? '회사명' : '학교명'} value={draft.organization} onChange={e => onChange({ ...draft, organization: e.target.value })} onFocus={focus} onBlur={blur} />
-    <input style={{ ...inputBase }} placeholder="기간 (예: 2022.03 – 현재)" value={draft.period} onChange={e => onChange({ ...draft, period: e.target.value })} onFocus={focus} onBlur={blur} />
-    <textarea style={{ ...inputBase, resize: 'vertical', lineHeight: 1.6, minHeight: 70 }} placeholder="설명 (주요 업무, 성과 등)" value={draft.description} onChange={e => onChange({ ...draft, description: e.target.value })} onFocus={focus} onBlur={blur} />
-    <div style={{ display: 'flex', gap: 8 }}>
-      <button onClick={onCancel} style={{ flex: 1, padding: '8px', borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', color: D.muted, fontSize: tokens.fontSizes.sm, cursor: 'pointer', fontWeight: 500 }}>취소</button>
-      <button onClick={onSave} style={{ flex: 2, padding: '8px', borderRadius: 7, border: 'none', background: '#fff', color: '#000', fontSize: tokens.fontSizes.sm, cursor: 'pointer', fontWeight: 700 }}>저장</button>
-    </div>
-  </div>
-);
+  );
+};
 
 /* ── Project Editor ── */
 

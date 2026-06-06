@@ -26,13 +26,17 @@ const D = {
 };
 
 const CompanyLogo: React.FC<{ company: Company; size: number }> = ({ company, size }) => (
-  <div style={{
-    width: size, height: size, borderRadius: 10, background: company.logoGradient,
-    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-    color: '#fff', fontWeight: 800, fontSize: size * 0.4,
-  }}>
-    {company.name.trim()[0] ?? '?'}
-  </div>
+  company.logoImage ? (
+    <img src={company.logoImage} alt={company.name} style={{ width: size, height: size, borderRadius: 10, objectFit: 'cover', display: 'block', flexShrink: 0 }} />
+  ) : (
+    <div style={{
+      width: size, height: size, borderRadius: 10, background: company.logoGradient,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      color: '#fff', fontWeight: 800, fontSize: size * 0.4,
+    }}>
+      {company.name.trim()[0] ?? '?'}
+    </div>
+  )
 );
 
 const Companies: React.FC<CompaniesProps> = ({ companies, onOpen, onCreate, onManage }) => {

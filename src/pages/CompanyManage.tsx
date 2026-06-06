@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { tokens } from '../tokens';
 import { createEmptyCompany, type Company, type CompanyOpening } from '../data/defaultData';
 import { ArrowLeftIcon, PlusIcon, TrashIcon, CheckIcon } from '../components/Icons';
+
+const fileToDataUrl = (file: File): Promise<string> =>
+  new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target!.result as string); r.readAsDataURL(file); });
 
 interface CompanyManageProps {
   company: Company | null;
@@ -62,7 +65,26 @@ const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete
   const [founded, setFounded] = useState(base.founded);
   const [about, setAbout] = useState(base.about);
   const [logoGradient, setLogoGradient] = useState(base.logoGradient);
+  const [logoImage, setLogoImage] = useState<string | undefined>(base.logoImage);
+  const [coverImage, setCoverImage] = useState<string | undefined>(base.coverImage);
   const [openings, setOpenings] = useState<CompanyOpening[]>(base.openings);
+
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoImage(await fileToDataUrl(file));
+    e.target.value = '';
+  };
+
+  const handleCoverFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCoverImage(await fileToDataUrl(file));
+    e.target.value = '';
+  };
 
   const canSave = name.trim().length > 0;
 
@@ -81,7 +103,7 @@ const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete
       ...base,
       name: name.trim(), tagline: tagline.trim(), industry: industry.trim(),
       size, location: location.trim(), website: website.trim(), founded: founded.trim(),
-      about: about.trim(), logoGradient, openings: cleaned, isManaged: true,
+      about: about.trim(), logoGradient, logoImage, coverImage, openings: cleaned, isManaged: true,
     });
   };
 
@@ -101,28 +123,65 @@ const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete
 
         {/* Basic info */}
         <Card title="기본 정보">
+          {/* Cover image */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ ...labelStyle }}>커버 배너</div>
+            <div
+              onClick={() => coverInputRef.current?.click()}
+              style={{
+                height: 88, borderRadius: 10, border: `1px solid ${D.border}`, cursor: 'pointer',
+                background: coverImage ? `url(${coverImage}) center/cover no-repeat` : (base.coverGradient || 'linear-gradient(135deg,#0f172a,#1a56db)'),
+                position: 'relative', overflow: 'hidden',
+              }}
+            >
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.35)' }}>
+                <span style={{ fontSize: tokens.fontSizes.xs, color: 'rgba(255,255,255,0.9)', fontWeight: 600, background: 'rgba(0,0,0,0.4)', padding: '5px 12px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.15)' }}>
+                  {coverImage ? '배너 변경' : '+ 배너 업로드'}
+                </span>
+              </div>
+            </div>
+            <input ref={coverInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleCoverFile} />
+            {coverImage && <button type="button" onClick={() => setCoverImage(undefined)} style={{ background: 'none', border: 'none', color: D.muted, fontSize: tokens.fontSizes.xs, cursor: 'pointer', padding: '4px 0 0' }}>배너 제거</button>}
+          </div>
+
           {/* Logo preview + picker */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-            <div style={{
-              width: 64, height: 64, borderRadius: 12, background: logoGradient,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              color: '#fff', fontWeight: 800, fontSize: 28,
-            }}>
-              {name.trim()[0] ?? 'A'}
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              {logoImage ? (
+                <img src={logoImage} alt="logo" style={{ width: 64, height: 64, borderRadius: 12, objectFit: 'cover', display: 'block' }} />
+              ) : (
+                <div style={{
+                  width: 64, height: 64, borderRadius: 12, background: logoGradient,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontWeight: 800, fontSize: 28,
+                }}>
+                  {name.trim()[0] ?? 'A'}
+                </div>
+              )}
             </div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {LOGO_GRADIENTS.map(g => (
-                <button
-                  key={g}
-                  onClick={() => setLogoGradient(g)}
-                  style={{
-                    width: 30, height: 30, borderRadius: 8, background: g, cursor: 'pointer',
-                    border: logoGradient === g ? '2.5px solid #fff' : '2.5px solid transparent',
-                    outline: 'none',
-                  }}
-                />
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {LOGO_GRADIENTS.map(g => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => { setLogoGradient(g); setLogoImage(undefined); }}
+                    style={{
+                      width: 30, height: 30, borderRadius: 8, background: g, cursor: 'pointer',
+                      border: (!logoImage && logoGradient === g) ? '2.5px solid #fff' : '2.5px solid transparent',
+                      outline: 'none',
+                    }}
+                  />
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <button type="button" onClick={() => logoInputRef.current?.click()} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${D.border}`, color: D.body, borderRadius: 7, padding: '5px 12px', fontSize: tokens.fontSizes.xs, fontWeight: 600, cursor: 'pointer' }}>
+                  이미지 업로드
+                </button>
+                {logoImage && <button type="button" onClick={() => setLogoImage(undefined)} style={{ background: 'none', border: 'none', color: D.muted, fontSize: tokens.fontSizes.xs, cursor: 'pointer', padding: 0 }}>제거</button>}
+              </div>
             </div>
+            <input ref={logoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleLogoFile} />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

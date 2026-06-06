@@ -29,6 +29,7 @@ interface Conversation {
   timestamp: string;
   unread: number;
   messages: Message[];
+  lastReadMsgId: string | null;
 }
 
 const SAMPLE: Conversation[] = [
@@ -40,6 +41,7 @@ const SAMPLE: Conversation[] = [
     lastMessage: '코드 리뷰 부탁드려도 될까요?',
     timestamp: '방금',
     unread: 2,
+    lastReadMsgId: 'm3',
     messages: [
       { id: 'm1', text: '안녕하세요! 김민준님 오픈소스 프로젝트 잘 보고 있어요 🙌', from: 'them', time: '14:31' },
       { id: 'm2', text: '혹시 DevFlow CLI PR 리뷰 부탁드려도 될까요?', from: 'them', time: '14:32' },
@@ -55,6 +57,7 @@ const SAMPLE: Conversation[] = [
     lastMessage: 'LangChain 관련해서 여쭤봐도 될까요?',
     timestamp: '1시간 전',
     unread: 0,
+    lastReadMsgId: 'm2',
     messages: [
       { id: 'm1', text: 'QueryPilot 정말 인상적이에요! PostgreSQL 인덱스 최적화 부분 특히요.', from: 'them', time: '10:12' },
       { id: 'm2', text: '감사합니다! 어떤 부분이 제일 도움이 됐나요?', from: 'me', time: '10:18' },
@@ -69,6 +72,7 @@ const SAMPLE: Conversation[] = [
     lastMessage: '포지션 관련 문의드립니다.',
     timestamp: '어제',
     unread: 1,
+    lastReadMsgId: null,
     messages: [
       { id: 'm1', text: '안녕하세요, 김민준님! Toss 채용팀입니다.', from: 'them', time: '어제 16:30' },
       { id: 'm2', text: 'Senior Frontend Engineer 포지션 관련 문의드립니다. 관심 있으신가요?', from: 'them', time: '어제 16:31' },
@@ -82,6 +86,7 @@ const SAMPLE: Conversation[] = [
     lastMessage: '다음 달에 오픈소스 컨퍼런스 가시나요?',
     timestamp: '3일 전',
     unread: 0,
+    lastReadMsgId: 'm2',
     messages: [
       { id: 'm1', text: 'RealtimeSync OT 구현 보니까 대박이네요. 어떻게 그걸 혼자 구현하셨어요?', from: 'them', time: '3일 전' },
       { id: 'm2', text: '2주 정도 논문 읽으면서 구현했어요 ㅎㅎ', from: 'me', time: '3일 전' },
@@ -96,6 +101,7 @@ const Messages: React.FC = () => {
   const [input, setInput] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 700);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const sendLock = useRef(false);
 
   const active = conversations.find(c => c.id === activeId) ?? null;
 
@@ -116,16 +122,24 @@ const Messages: React.FC = () => {
 
   const sendMessage = () => {
     const text = input.trim();
-    if (!text || !activeId) return;
+    if (!text || !activeId || sendLock.current) return;
+    sendLock.current = true;
     const now = new Date();
     const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
     const newMsg: Message = { id: 'm' + Date.now(), text, from: 'me', time };
+    const cid = activeId;
     setConversations(prev => prev.map(c =>
-      c.id === activeId
+      c.id === cid
         ? { ...c, messages: [...c.messages, newMsg], lastMessage: text, timestamp: '방금' }
         : c
     ));
     setInput('');
+    sendLock.current = false;
+    setTimeout(() => {
+      setConversations(prev => prev.map(c =>
+        c.id === cid ? { ...c, lastReadMsgId: newMsg.id } : c
+      ));
+    }, 1500);
   };
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -220,7 +234,12 @@ const Messages: React.FC = () => {
                 }}>
                   {msg.text}
                 </div>
-                <div style={{ fontSize: '10px', color: D.muted, paddingInline: 4 }}>{msg.time}</div>
+                <div style={{ fontSize: '10px', color: D.muted, paddingInline: 4, display: 'flex', gap: 6, alignItems: 'center' }}>
+                  {isMe && active.lastReadMsgId === msg.id && (
+                    <span style={{ color: D.accent, fontWeight: 600 }}>읽음</span>
+                  )}
+                  {msg.time}
+                </div>
               </div>
             </div>
           );
@@ -247,6 +266,7 @@ const Messages: React.FC = () => {
           onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
         />
         <button
+          type="button"
           onClick={sendMessage}
           disabled={!input.trim()}
           style={{

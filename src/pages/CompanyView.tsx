@@ -74,19 +74,23 @@ const CompanyView: React.FC<CompanyViewProps> = ({ company, onBack, onManage, on
           overflow: 'hidden', marginBottom: 14,
         }}>
           {/* Cover */}
-          <div style={{ height: 120, background: c.coverGradient, position: 'relative', zIndex: 0, opacity: 0.7 }} />
+          <div style={{ height: 120, background: c.coverImage ? `url(${c.coverImage}) center/cover no-repeat` : c.coverGradient, position: 'relative', zIndex: 0, opacity: 0.7 }} />
           <div style={{ padding: '0 24px 24px' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
               {/* Logo */}
-              <div style={{
-                marginTop: -36, position: 'relative', zIndex: 2,
-                width: 80, height: 80, borderRadius: 12, background: c.logoGradient,
-                border: `3px solid ${D.card}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontWeight: 800, fontSize: 34,
-              }}>
-                {c.name.trim()[0]}
-              </div>
+              {c.logoImage ? (
+                <img src={c.logoImage} alt={c.name} style={{ marginTop: -36, position: 'relative', zIndex: 2, width: 80, height: 80, borderRadius: 12, objectFit: 'cover', border: `3px solid ${D.card}`, display: 'block' }} />
+              ) : (
+                <div style={{
+                  marginTop: -36, position: 'relative', zIndex: 2,
+                  width: 80, height: 80, borderRadius: 12, background: c.logoGradient,
+                  border: `3px solid ${D.card}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontWeight: 800, fontSize: 34,
+                }}>
+                  {c.name.trim()[0]}
+                </div>
+              )}
               {/* Actions */}
               <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
                 <button

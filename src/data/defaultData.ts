@@ -480,6 +480,8 @@ export interface Company {
   tagline: string;
   logoGradient: string;
   coverGradient: string;
+  logoImage?: string;
+  coverImage?: string;
   industry: string;
   size: string;
   location: string;
