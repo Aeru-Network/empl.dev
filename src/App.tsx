@@ -15,7 +15,6 @@ import CompanyView from './pages/CompanyView';
 import CompanyManage from './pages/CompanyManage';
 import Messages from './pages/Messages';
 import {
-  defaultProfile,
   sampleCompanies,
   type ProfileData,
   type Company,
@@ -123,11 +122,8 @@ const App: React.FC = () => {
   };
 
   const handleLogin = () => {
-    if (!profile) {
-      setProfile(JSON.parse(JSON.stringify(defaultProfile)) as ProfileData);
-    }
     setLoggedIn(true);
-    navigate('profile');
+    navigate(profile ? 'profile' : 'onboarding');
   };
 
   const handleLogout = () => {
@@ -143,9 +139,8 @@ const App: React.FC = () => {
   };
 
   const loadSampleProfile = () => {
-    setProfile(JSON.parse(JSON.stringify(defaultProfile)) as ProfileData);
     setLoggedIn(true);
-    navigate('profile');
+    navigate('onboarding');
   };
 
   const resetProfile = () => {

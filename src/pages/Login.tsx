@@ -45,7 +45,7 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onLogin }) => {
             계정 로그인
           </h2>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.55 }}>
-            empl SSO 계정으로 계속합니다
+            AERU SSO 계정으로 계속합니다
           </p>
         </div>
 
@@ -78,13 +78,13 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onLogin }) => {
                 <path d="M8 1.5C4.41 1.5 1.5 4.41 1.5 8s2.91 6.5 6.5 6.5S14.5 11.59 14.5 8 11.59 1.5 8 1.5z" stroke="white" strokeWidth="1.3" strokeLinecap="round"/>
                 <path d="M5.5 8h5M8 5.5v5" stroke="white" strokeWidth="1.3" strokeLinecap="round"/>
               </svg>
-              empl SSO로 계속하기
+              AERU SSO로 계속하기
             </>
           )}
         </button>
 
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.22)', fontSize: 11, marginTop: 20, lineHeight: 1.6 }}>
-          계속하면 empl.dev{' '}
+          계속하면 AERU{' '}
           <button
             onClick={() => {}}
             style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.22)', fontSize: 11, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit', padding: 0 }}

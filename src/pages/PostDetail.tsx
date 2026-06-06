@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { tokens } from '../tokens';
-import { defaultProfile, type ProfileData } from '../data/defaultData';
+import { type ProfileData } from '../data/defaultData';
 import { HeartIcon, EyeIcon, ClockIcon, ArrowLeftIcon } from '../components/Icons';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 
@@ -16,10 +16,21 @@ const D = {
   accent: '#0070f3', tag: 'rgba(255,255,255,0.07)', tagText: '#a1a1aa',
 };
 
-const PostDetail: React.FC<PostDetailProps> = ({ postId, profile: profileProp, onBack }) => {
-  const profile = profileProp && profileProp.posts.length > 0 ? profileProp : defaultProfile;
-  const post = profile.posts.find(p => p.id === postId) ?? profile.posts[0] ?? defaultProfile.posts[0];
+const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
+  const post = profile?.posts.find(p => p.id === postId) ?? null;
   const [liked, setLiked] = useState(false);
+
+  if (!profile || !post) {
+    return (
+      <div style={{ background: D.bg, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', color: D.muted }}>
+          <div style={{ fontSize: 36, marginBottom: 12 }}>📄</div>
+          <div style={{ fontSize: '16px', fontWeight: 600, color: D.body, marginBottom: 8 }}>포스트를 찾을 수 없습니다</div>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#5b9cf6', cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600 }}>← 돌아가기</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: D.bg, minHeight: '100vh' }}>
@@ -65,7 +76,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile: profileProp, o
             <img src={profile.avatar} alt={profile.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
           ) : (
             <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#1a56db,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 16, fontWeight: 700, flexShrink: 0 }}>
-              {profile.name[0]}
+              {profile.name?.[0] ?? '?'}
             </div>
           )}
           <div>
@@ -125,7 +136,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile: profileProp, o
             <img src={profile.avatar} alt={profile.name} style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
           ) : (
             <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#1a56db,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 20, fontWeight: 700, flexShrink: 0 }}>
-              {profile.name[0]}
+              {profile.name?.[0] ?? '?'}
             </div>
           )}
           <div>

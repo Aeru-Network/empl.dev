@@ -312,11 +312,19 @@ const Profile: React.FC<ProfileProps> = ({ profile, onPostClick, onInitialize, o
 
 /* Sub-components */
 
-const TimelineContent: React.FC<{ profile: ProfileData }> = ({ profile }) => (
+function parsePeriodStart(period: string): number {
+  const start = period.split(/\s*[–\-]\s*/)[0].trim();
+  const [y = '0', m = '0'] = start.split('.');
+  return parseInt(y) * 100 + parseInt(m);
+}
+
+const TimelineContent: React.FC<{ profile: ProfileData }> = ({ profile }) => {
+  const sorted = [...profile.experience].sort((a, b) => parsePeriodStart(b.period) - parsePeriodStart(a.period));
+  return (
   <div style={{ position: 'relative' }}>
     <div style={{ position: 'absolute', left: 4, top: 8, bottom: 8, width: 2, background: D.border, borderRadius: 1 }} />
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {profile.experience.map(exp => (
+      {sorted.map(exp => (
         <div key={exp.id} style={{ display: 'flex', gap: '16px', paddingLeft: 4 }}>
           <div style={{ flexShrink: 0, marginTop: 8 }}>
             <div style={{ width: 10, height: 10, borderRadius: '50%', background: exp.type === 'work' ? '#0070f3' : '#a78bfa', position: 'relative', zIndex: 1 }} />
@@ -337,7 +345,8 @@ const TimelineContent: React.FC<{ profile: ProfileData }> = ({ profile }) => (
       ))}
     </div>
   </div>
-);
+  );
+};
 
 const MoreButton: React.FC<{ show: boolean; expanded: boolean; count: number; onToggle: () => void }> = ({ show, expanded, count, onToggle }) => {
   if (!show) return null;
