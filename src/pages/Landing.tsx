@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { tokens } from '../tokens';
-import { SearchIcon, CodeIcon, BriefcaseIcon, UsersIcon } from '../components/Icons';
+import { SearchIcon } from '../components/Icons';
 
 type Page =
   | 'landing' | 'profile' | 'explore' | 'jobs' | 'login' | 'mypage'
@@ -33,7 +33,7 @@ const NAV_H = 56;
 const TOTAL = 3;
 const SH = `calc(100vh - ${NAV_H}px)`;
 
-const FeatureCard: React.FC<{ icon: React.ReactNode; accentDim: string; title: string; desc: string }> = ({ icon, accentDim, title, desc }) => {
+const FeatureCard: React.FC<{ title: string; desc: string }> = ({ title, desc }) => {
   const [hovered, setHovered] = useState(false);
   return (
     <div
@@ -49,12 +49,6 @@ const FeatureCard: React.FC<{ icon: React.ReactNode; accentDim: string; title: s
         flex: 1,
       }}
     >
-      <div style={{
-        width: 48, height: 48, borderRadius: 12, backgroundColor: accentDim,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20,
-      }}>
-        {icon}
-      </div>
       <div style={{ fontSize: tokens.fontSizes.md, fontWeight: 700, color: D.heading, marginBottom: 10 }}>{title}</div>
       <p style={{ fontSize: tokens.fontSizes.sm, color: D.body, margin: 0, lineHeight: 1.75 }}>{desc}</p>
     </div>
@@ -152,16 +146,6 @@ const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
           <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: 700, height: 320, background: 'radial-gradient(ellipse,rgba(0,112,243,0.18) 0%,transparent 70%)', pointerEvents: 'none' }} />
 
           <div style={{ maxWidth: 680, width: '100%', padding: '0 20px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-            {/* Badge */}
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: 'rgba(255,255,255,0.04)', border: `1px solid ${D.border}`,
-              borderRadius: 999, padding: '5px 14px', marginBottom: 24,
-            }}>
-              <CodeIcon size={12} color={D.accent} />
-              <span style={{ fontSize: 11, color: D.body, fontWeight: 500, letterSpacing: '0.3px' }}>개발자를 위한 커리어 플랫폼</span>
-            </div>
-
             <h1 style={{
               fontSize: 'clamp(38px, 7.5vw, 76px)',
               fontWeight: 800, color: D.heading, margin: '0 0 18px',
@@ -254,20 +238,14 @@ const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
             </div>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
               <FeatureCard
-                icon={<CodeIcon size={24} color={D.accent} />}
-                accentDim={D.accentDim}
                 title="코드 포트폴리오"
                 desc="GitHub 연동으로 프로젝트와 기여도를 자동으로 가져와 보여줍니다. 코드가 곧 이력서입니다."
               />
               <FeatureCard
-                icon={<BriefcaseIcon size={24} color={D.orange} />}
-                accentDim={D.orangeDim}
                 title="개발자 맞춤 채용"
                 desc="기술 스택 기반 매칭으로 딱 맞는 포지션을 추천받으세요. 헤드헌터 없이 직접 지원."
               />
               <FeatureCard
-                icon={<UsersIcon size={24} color={D.success} />}
-                accentDim={D.successDim}
                 title="개발자 네트워크"
                 desc="같은 기술을 쓰는 개발자들과 연결하고 오픈소스로 협업하세요. 커뮤니티가 경력입니다."
               />
@@ -292,15 +270,6 @@ const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
           <div style={{ position: 'absolute', top: '30%', left: '50%', transform: 'translateX(-50%)', width: 500, height: 300, background: 'radial-gradient(ellipse,rgba(0,112,243,0.1) 0%,transparent 65%)', pointerEvents: 'none' }} />
 
           <div style={{ textAlign: 'center', maxWidth: 600, padding: '0 20px', position: 'relative', zIndex: 1 }}>
-            <div style={{
-              display: 'inline-block',
-              background: 'rgba(0,112,243,0.1)', border: '1px solid rgba(0,112,243,0.25)',
-              borderRadius: 999, padding: '5px 16px', marginBottom: 28,
-              fontSize: 11, fontWeight: 600, color: D.accent, letterSpacing: '0.3px',
-            }}>
-              무료로 시작 · 신용카드 불필요
-            </div>
-
             <h2 style={{
               fontSize: 'clamp(32px, 6vw, 68px)',
               fontWeight: 800, color: D.heading, margin: '0 0 16px',
