@@ -161,7 +161,7 @@ const App: React.FC = () => {
   const showNav = PAGES_WITH_NAV.includes(page);
 
   return (
-    <div style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+    <div style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: '#000', minHeight: '100vh' }}>
       {showNav && (
         <Nav
           currentPage={page}
@@ -205,7 +205,7 @@ const App: React.FC = () => {
       )}
 
       {page === 'settings' && (
-        <Settings profile={profile} onSave={setProfile} onReset={resetProfile} onInitialize={() => navigate('onboarding')} />
+        <Settings profile={profile} onSave={(p) => { setProfile(p); navigate('profile'); }} onReset={resetProfile} onInitialize={() => navigate('onboarding')} />
       )}
 
       {page === 'onboarding' && (

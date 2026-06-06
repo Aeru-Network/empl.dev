@@ -42,6 +42,7 @@ export interface ProfileData {
   headline: string;
   bio: string;
   avatar: string;
+  banner?: string;
   location: string;
   role: string;
   yearsOfExp: number;
