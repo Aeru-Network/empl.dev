@@ -147,18 +147,20 @@ const Explore: React.FC<ExploreProps> = ({ onNavigate }) => {
               </button>
             )}
           </div>
-          <div style={{ display: 'flex', gap: 4 }}>
+          <div style={{ display: 'flex', gap: '6px', background: '#0a0a0a', border: `1px solid ${D.border}`, borderRadius: 10, padding: 4 }}>
             {SORT_OPTIONS.map(opt => (
               <button
                 key={opt.value}
                 onClick={() => setSort(opt.value)}
                 style={{
-                  border: `1px solid ${sort === opt.value ? 'rgba(0,112,243,0.4)' : D.border}`,
-                  background: sort === opt.value ? D.accentDim : 'transparent',
-                  color: sort === opt.value ? '#5b9cf6' : D.muted,
-                  borderRadius: 999, padding: '4px 12px',
-                  fontSize: tokens.fontSizes.xs, fontWeight: 500, cursor: 'pointer',
-                  transition: `all ${tokens.transitions.fast}`, fontFamily: 'inherit',
+                  border: 'none',
+                  background: sort === opt.value ? '#1a1a1a' : 'transparent',
+                  color: sort === opt.value ? D.heading : D.muted,
+                  borderRadius: 7, padding: '6px 14px',
+                  fontSize: tokens.fontSizes.xs, fontWeight: sort === opt.value ? 600 : 400,
+                  cursor: 'pointer', fontFamily: 'inherit',
+                  transition: `all ${tokens.transitions.fast}`,
+                  outline: sort === opt.value ? `1px solid ${D.border}` : 'none',
                 }}
               >
                 {opt.label}
