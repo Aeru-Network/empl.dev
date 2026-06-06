@@ -113,7 +113,7 @@ const Nav: React.FC<NavProps> = ({ currentPage, onNavigate, isLoggedIn = true, p
   return (
     <nav style={{
       position: 'sticky', top: 0, zIndex: tokens.zIndex.nav,
-      background: D.bg, backdropFilter: 'blur(16px)',
+      background: '#000',
       borderBottom: `1px solid ${D.border}`, height: 56,
       display: 'flex', alignItems: 'center',
     }}>
