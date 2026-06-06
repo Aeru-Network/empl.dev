@@ -10,11 +10,26 @@ interface CompaniesProps {
   onManage: (id: string) => void;
 }
 
+const D = {
+  bg: '#000000',
+  card: '#0f0f0f',
+  cardHover: '#161616',
+  border: 'rgba(255,255,255,0.08)',
+  borderHover: 'rgba(255,255,255,0.18)',
+  heading: '#ffffff',
+  body: '#a1a1aa',
+  muted: '#52525b',
+  accent: '#0070f3',
+  accentDim: 'rgba(0,112,243,0.12)',
+  tag: 'rgba(255,255,255,0.06)',
+  tagText: '#a1a1aa',
+};
+
 const CompanyLogo: React.FC<{ company: Company; size: number }> = ({ company, size }) => (
   <div style={{
-    width: size, height: size, borderRadius: tokens.borderRadius.lg, background: company.logoGradient,
+    width: size, height: size, borderRadius: 10, background: company.logoGradient,
     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-    color: '#fff', fontWeight: tokens.fontWeights.extrabold, fontSize: size * 0.4,
+    color: '#fff', fontWeight: 800, fontSize: size * 0.4,
   }}>
     {company.name.trim()[0] ?? '?'}
   </div>
@@ -25,65 +40,73 @@ const Companies: React.FC<CompaniesProps> = ({ companies, onOpen, onCreate, onMa
   const all = companies;
 
   return (
-    <div style={{ background: tokens.colors.background, minHeight: '100vh' }}>
+    <div style={{ background: D.bg, minHeight: '100vh' }}>
       {/* Header */}
-      <div style={{ background: tokens.colors.navyGrad, padding: '40px 20px 48px' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-          <h1 style={{ fontSize: tokens.fontSizes.xxl, fontWeight: tokens.fontWeights.extrabold, color: '#fff', margin: '0 0 8px', letterSpacing: '-0.5px' }}>
+      <div style={{
+        borderBottom: `1px solid ${D.border}`,
+        padding: 'clamp(48px, 7vw, 80px) 20px clamp(48px, 7vw, 80px)',
+        position: 'relative', overflow: 'hidden', textAlign: 'center',
+      }}>
+        <div style={{ position: 'absolute', top: '-30%', left: '50%', transform: 'translateX(-50%)', width: 500, height: 300, background: 'radial-gradient(ellipse, rgba(0,112,243,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 640, margin: '0 auto' }}>
+          <h1 style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontWeight: 800, color: D.heading, margin: '0 0 12px', letterSpacing: '-2px' }}>
             회사
           </h1>
-          <p style={{ fontSize: tokens.fontSizes.sm, color: 'rgba(255,255,255,0.65)', margin: 0 }}>
+          <p style={{ fontSize: tokens.fontSizes.md, color: D.body, margin: 0, lineHeight: 1.6 }}>
             기업 페이지를 탐색하고, 내 회사 페이지를 직접 관리하세요
           </p>
         </div>
       </div>
 
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '28px 20px 60px' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 20px 80px' }}>
         {/* My managed pages */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <h2 style={{ fontSize: tokens.fontSizes.lg, fontWeight: tokens.fontWeights.bold, color: tokens.colors.textPrimary, margin: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+          <h2 style={{ fontSize: tokens.fontSizes.lg, fontWeight: 700, color: D.heading, margin: 0, letterSpacing: '-0.3px' }}>
             내가 관리하는 페이지
           </h2>
           <button
             onClick={onCreate}
             style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: tokens.borderRadius.md,
-              border: 'none', background: tokens.colors.primary, color: '#fff',
-              fontSize: tokens.fontSizes.sm, fontWeight: tokens.fontWeights.semibold, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8,
+              border: `1px solid ${D.border}`, background: D.card, color: D.heading,
+              fontSize: tokens.fontSizes.sm, fontWeight: 600, cursor: 'pointer',
+              transition: `border-color ${tokens.transitions.fast}`,
             }}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = D.borderHover)}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = D.border)}
           >
-            <PlusIcon size={15} color="#fff" />
+            <PlusIcon size={14} color={D.heading} />
             새 페이지
           </button>
         </div>
 
         {managed.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14, marginBottom: 40 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12, marginBottom: 48 }}>
             {managed.map(c => (
               <div key={c.id} style={{
-                background: tokens.colors.surface, borderRadius: tokens.borderRadius.xl,
-                border: `1px solid ${tokens.colors.border}`, padding: 18, boxShadow: tokens.shadows.card,
-                display: 'flex', flexDirection: 'column', gap: 12,
+                background: D.card, borderRadius: 10,
+                border: `1px solid ${D.border}`, padding: 18,
+                display: 'flex', flexDirection: 'column', gap: 14,
               }}>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <CompanyLogo company={c} size={48} />
+                  <CompanyLogo company={c} size={46} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: tokens.fontWeights.bold, color: tokens.colors.textPrimary }}>{c.name}</div>
-                    <div style={{ fontSize: tokens.fontSizes.xs, color: tokens.colors.textMuted, marginTop: 2 }}>{c.followers.toLocaleString()} 팔로워</div>
+                    <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 700, color: D.heading }}>{c.name}</div>
+                    <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted, marginTop: 3 }}>{c.followers.toLocaleString()} 팔로워</div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button
                     onClick={() => onOpen(c.id)}
-                    style={{ flex: 1, padding: '8px', borderRadius: tokens.borderRadius.md, border: `1.5px solid ${tokens.colors.border}`, background: 'none', fontSize: tokens.fontSizes.xs, fontWeight: tokens.fontWeights.semibold, color: tokens.colors.textSecondary, cursor: 'pointer' }}
+                    style={{ flex: 1, padding: '8px', borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', fontSize: tokens.fontSizes.xs, fontWeight: 600, color: D.body, cursor: 'pointer' }}
                   >
                     보기
                   </button>
                   <button
                     onClick={() => onManage(c.id)}
-                    style={{ flex: 1, padding: '8px', borderRadius: tokens.borderRadius.md, border: 'none', background: tokens.colors.primaryLight, color: tokens.colors.primary, fontSize: tokens.fontSizes.xs, fontWeight: tokens.fontWeights.semibold, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
+                    style={{ flex: 1, padding: '8px', borderRadius: 7, border: `1px solid ${D.border}`, background: D.accentDim, color: '#5b9cf6', fontSize: tokens.fontSizes.xs, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
                   >
-                    <PencilIcon size={12} color={tokens.colors.primary} /> 관리
+                    <PencilIcon size={12} color="#5b9cf6" /> 관리
                   </button>
                 </div>
               </div>
@@ -91,64 +114,64 @@ const Companies: React.FC<CompaniesProps> = ({ companies, onOpen, onCreate, onMa
           </div>
         ) : (
           <div style={{
-            background: tokens.colors.surface, borderRadius: tokens.borderRadius.xl, border: `1px dashed ${tokens.colors.border}`,
-            padding: '32px 20px', textAlign: 'center', marginBottom: 40,
+            background: D.card, borderRadius: 10, border: `1px dashed ${D.border}`,
+            padding: '40px 20px', textAlign: 'center', marginBottom: 48,
           }}>
-            <BuildingIcon size={28} color={tokens.colors.textMuted} />
-            <p style={{ fontSize: tokens.fontSizes.sm, color: tokens.colors.textSecondary, margin: '10px 0 14px' }}>
+            <BuildingIcon size={26} color={D.muted} />
+            <p style={{ fontSize: tokens.fontSizes.sm, color: D.body, margin: '10px 0 16px' }}>
               아직 관리하는 회사 페이지가 없어요.
             </p>
             <button
               onClick={onCreate}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: tokens.borderRadius.md, border: 'none', background: tokens.colors.primary, color: '#fff', fontSize: tokens.fontSizes.sm, fontWeight: tokens.fontWeights.semibold, cursor: 'pointer' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 8, border: 'none', background: '#fff', color: '#000', fontSize: tokens.fontSizes.sm, fontWeight: 700, cursor: 'pointer' }}
             >
-              <PlusIcon size={15} color="#fff" /> 회사 페이지 만들기
+              <PlusIcon size={14} color="#000" /> 회사 페이지 만들기
             </button>
           </div>
         )}
 
         {/* All companies */}
-        <h2 style={{ fontSize: tokens.fontSizes.lg, fontWeight: tokens.fontWeights.bold, color: tokens.colors.textPrimary, margin: '0 0 16px' }}>
+        <h2 style={{ fontSize: tokens.fontSizes.lg, fontWeight: 700, color: D.heading, margin: '0 0 18px', letterSpacing: '-0.3px' }}>
           기업 둘러보기
         </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {all.map(c => (
             <div
               key={c.id}
               onClick={() => onOpen(c.id)}
               style={{
-                background: tokens.colors.surface, borderRadius: tokens.borderRadius.xl,
-                border: `1.5px solid ${tokens.colors.border}`, padding: '18px 20px', cursor: 'pointer',
-                display: 'flex', gap: 16, alignItems: 'center', boxShadow: tokens.shadows.card,
+                background: D.card, borderRadius: 10,
+                border: `1px solid ${D.border}`, padding: '18px 20px', cursor: 'pointer',
+                display: 'flex', gap: 16, alignItems: 'center',
                 transition: `border-color ${tokens.transitions.fast}`,
               }}
-              onMouseEnter={e => (e.currentTarget.style.borderColor = tokens.colors.primary)}
-              onMouseLeave={e => (e.currentTarget.style.borderColor = tokens.colors.border)}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = D.borderHover)}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = D.border)}
             >
-              <CompanyLogo company={c} size={52} />
+              <CompanyLogo company={c} size={50} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: tokens.fontSizes.md, fontWeight: tokens.fontWeights.bold, color: tokens.colors.textPrimary }}>{c.name}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                  <span style={{ fontSize: tokens.fontSizes.md, fontWeight: 700, color: D.heading }}>{c.name}</span>
                   {c.isManaged && (
-                    <span style={{ fontSize: '10px', fontWeight: tokens.fontWeights.semibold, color: tokens.colors.primary, background: tokens.colors.primaryLight, padding: '2px 7px', borderRadius: tokens.borderRadius.full }}>관리자</span>
+                    <span style={{ fontSize: '10px', fontWeight: 600, color: '#5b9cf6', background: D.accentDim, padding: '2px 7px', borderRadius: 999, border: `1px solid rgba(0,112,243,0.2)` }}>관리자</span>
                   )}
                 </div>
-                <div style={{ fontSize: tokens.fontSizes.xs, color: tokens.colors.textSecondary, margin: '3px 0 8px' }}>{c.tagline}</div>
-                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: tokens.fontSizes.xs, color: tokens.colors.textMuted }}>
-                    <BuildingIcon size={12} color={tokens.colors.textMuted} /> {c.industry}
+                <div style={{ fontSize: tokens.fontSizes.xs, color: D.body, marginBottom: 10 }}>{c.tagline}</div>
+                <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: tokens.fontSizes.xs, color: D.muted }}>
+                    <BuildingIcon size={11} color={D.muted} /> {c.industry}
                   </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: tokens.fontSizes.xs, color: tokens.colors.textMuted }}>
-                    <LocationIcon size={12} color={tokens.colors.textMuted} /> {c.location}
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: tokens.fontSizes.xs, color: D.muted }}>
+                    <LocationIcon size={11} color={D.muted} /> {c.location}
                   </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: tokens.fontSizes.xs, color: tokens.colors.textMuted }}>
-                    <UsersIcon size={12} color={tokens.colors.textMuted} /> {c.size}
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: tokens.fontSizes.xs, color: D.muted }}>
+                    <UsersIcon size={11} color={D.muted} /> {c.size}
                   </span>
                 </div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: tokens.fontWeights.bold, color: tokens.colors.primary }}>{c.openings.length}</div>
-                <div style={{ fontSize: tokens.fontSizes.xs, color: tokens.colors.textMuted }}>채용중</div>
+                <div style={{ fontSize: tokens.fontSizes.md, fontWeight: 700, color: D.heading }}>{c.openings.length}</div>
+                <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted }}>채용중</div>
               </div>
             </div>
           ))}

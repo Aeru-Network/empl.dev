@@ -4,11 +4,27 @@ import { createEmptyCompany, type Company, type CompanyOpening } from '../data/d
 import { ArrowLeftIcon, PlusIcon, TrashIcon, CheckIcon } from '../components/Icons';
 
 interface CompanyManageProps {
-  company: Company | null; // null = create new
+  company: Company | null;
   onSave: (company: Company) => void;
   onDelete: (id: string) => void;
   onCancel: () => void;
 }
+
+const D = {
+  bg: '#000000',
+  card: '#0f0f0f',
+  input: '#111111',
+  inputBorder: 'rgba(255,255,255,0.10)',
+  inputBorderFocus: 'rgba(255,255,255,0.25)',
+  border: 'rgba(255,255,255,0.08)',
+  heading: '#ffffff',
+  body: '#a1a1aa',
+  muted: '#52525b',
+  accent: '#0070f3',
+  accentDim: 'rgba(0,112,243,0.12)',
+  error: '#ef4444',
+  errorDim: 'rgba(239,68,68,0.1)',
+};
 
 const LOGO_GRADIENTS = [
   'linear-gradient(135deg, #1a56db 0%, #6366f1 100%)',
@@ -16,21 +32,21 @@ const LOGO_GRADIENTS = [
   'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)',
   'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
   'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
-  'linear-gradient(135deg, #0f172a 0%, #334155 100%)',
+  'linear-gradient(135deg, #334155 0%, #64748b 100%)',
 ];
 
 const SIZES = ['1-10명', '11-50명', '51-200명', '201-500명', '500명 이상'];
 
 const labelStyle: React.CSSProperties = {
-  fontSize: tokens.fontSizes.xs, fontWeight: tokens.fontWeights.semibold,
-  color: tokens.colors.textSecondary, display: 'block', marginBottom: 6,
+  fontSize: tokens.fontSizes.xs, fontWeight: 600,
+  color: D.body, display: 'block', marginBottom: 6, letterSpacing: '0.2px',
 };
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '10px 12px', border: `1.5px solid ${tokens.colors.border}`,
-  borderRadius: tokens.borderRadius.md, fontSize: tokens.fontSizes.sm,
-  color: tokens.colors.textPrimary, outline: 'none', boxSizing: 'border-box',
-  background: tokens.colors.surface, fontFamily: 'inherit',
+  width: '100%', padding: '10px 12px', border: `1px solid ${D.inputBorder}`,
+  borderRadius: 8, fontSize: tokens.fontSizes.sm,
+  color: D.heading, outline: 'none', boxSizing: 'border-box',
+  background: D.input, fontFamily: 'inherit',
 };
 
 const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete, onCancel }) => {
@@ -70,27 +86,27 @@ const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete
   };
 
   return (
-    <div style={{ background: tokens.colors.background, minHeight: '100vh', padding: '20px 20px 80px' }}>
+    <div style={{ background: D.bg, minHeight: '100vh', padding: '20px 20px 80px' }}>
       <div style={{ maxWidth: 600, margin: '0 auto' }}>
         <button
           onClick={onCancel}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: tokens.colors.textSecondary, fontSize: tokens.fontSizes.sm, cursor: 'pointer', padding: '0 0 16px' }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: D.body, fontSize: tokens.fontSizes.sm, cursor: 'pointer', padding: '0 0 20px' }}
         >
-          <ArrowLeftIcon size={16} color={tokens.colors.textSecondary} /> 취소
+          <ArrowLeftIcon size={16} color={D.body} /> 취소
         </button>
 
-        <h1 style={{ fontSize: tokens.fontSizes.xxl, fontWeight: tokens.fontWeights.extrabold, color: tokens.colors.textPrimary, margin: '0 0 20px', letterSpacing: '-0.5px' }}>
+        <h1 style={{ fontSize: 'clamp(24px, 5vw, 40px)', fontWeight: 800, color: D.heading, margin: '0 0 28px', letterSpacing: '-1px' }}>
           {isNew ? '회사 페이지 만들기' : '회사 페이지 관리'}
         </h1>
 
         {/* Basic info */}
         <Card title="기본 정보">
           {/* Logo preview + picker */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
             <div style={{
-              width: 64, height: 64, borderRadius: tokens.borderRadius.xl, background: logoGradient,
+              width: 64, height: 64, borderRadius: 12, background: logoGradient,
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              color: '#fff', fontWeight: tokens.fontWeights.extrabold, fontSize: 28,
+              color: '#fff', fontWeight: 800, fontSize: 28,
             }}>
               {name.trim()[0] ?? 'A'}
             </div>
@@ -100,8 +116,9 @@ const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete
                   key={g}
                   onClick={() => setLogoGradient(g)}
                   style={{
-                    width: 28, height: 28, borderRadius: tokens.borderRadius.md, background: g, cursor: 'pointer',
-                    border: logoGradient === g ? `2.5px solid ${tokens.colors.primary}` : `2.5px solid transparent`,
+                    width: 30, height: 30, borderRadius: 8, background: g, cursor: 'pointer',
+                    border: logoGradient === g ? '2.5px solid #fff' : '2.5px solid transparent',
+                    outline: 'none',
                   }}
                 />
               ))}
@@ -137,11 +154,11 @@ const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete
         <Card title="채용 공고">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {openings.map(o => (
-              <div key={o.id} style={{ border: `1px solid ${tokens.colors.border}`, borderRadius: tokens.borderRadius.lg, padding: 14 }}>
+              <div key={o.id} style={{ border: `1px solid ${D.border}`, borderRadius: 8, padding: 14, background: '#0a0a0a' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ fontSize: tokens.fontSizes.xs, fontWeight: tokens.fontWeights.semibold, color: tokens.colors.textMuted }}>채용 포지션</span>
-                  <button onClick={() => removeOpening(o.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: tokens.colors.error, display: 'flex', padding: 2 }}>
-                    <TrashIcon size={14} color={tokens.colors.error} />
+                  <span style={{ fontSize: tokens.fontSizes.xs, fontWeight: 600, color: D.muted, textTransform: 'uppercase', letterSpacing: '0.5px' }}>채용 포지션</span>
+                  <button onClick={() => removeOpening(o.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.error, display: 'flex', padding: 2 }}>
+                    <TrashIcon size={14} color={D.error} />
                   </button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -168,12 +185,12 @@ const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete
               onClick={addOpening}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px',
-                border: `1.5px dashed ${tokens.colors.border}`, borderRadius: tokens.borderRadius.md,
-                background: 'none', color: tokens.colors.textSecondary, fontSize: tokens.fontSizes.sm,
-                fontWeight: tokens.fontWeights.medium, cursor: 'pointer',
+                border: `1px dashed ${D.border}`, borderRadius: 8,
+                background: 'none', color: D.body, fontSize: tokens.fontSizes.sm,
+                fontWeight: 500, cursor: 'pointer',
               }}
             >
-              <PlusIcon size={15} color={tokens.colors.textSecondary} /> 채용 공고 추가
+              <PlusIcon size={14} color={D.body} /> 채용 공고 추가
             </button>
           </div>
         </Card>
@@ -184,25 +201,27 @@ const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete
             onClick={handleSave}
             disabled={!canSave}
             style={{
-              flex: 1, padding: '12px', borderRadius: tokens.borderRadius.lg, border: 'none',
-              background: canSave ? tokens.colors.primary : tokens.colors.border, color: '#fff',
-              fontSize: tokens.fontSizes.md, fontWeight: tokens.fontWeights.bold,
-              cursor: canSave ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+              flex: 1, padding: '13px', borderRadius: 9, border: 'none',
+              background: canSave ? '#fff' : D.card,
+              color: canSave ? '#000' : D.muted,
+              fontSize: tokens.fontSizes.md, fontWeight: 700,
+              cursor: canSave ? 'pointer' : 'not-allowed',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
             }}
           >
-            <CheckIcon size={17} color="#fff" /> {isNew ? '페이지 만들기' : '변경사항 저장'}
+            <CheckIcon size={17} color={canSave ? '#000' : D.muted} /> {isNew ? '페이지 만들기' : '변경사항 저장'}
           </button>
           {!isNew && (
             <button
               onClick={() => onDelete(base.id)}
               style={{
-                padding: '12px 18px', borderRadius: tokens.borderRadius.lg,
-                border: `1.5px solid ${tokens.colors.error}`, background: 'none', color: tokens.colors.error,
-                fontSize: tokens.fontSizes.sm, fontWeight: tokens.fontWeights.semibold, cursor: 'pointer',
+                padding: '13px 18px', borderRadius: 9,
+                border: `1px solid rgba(239,68,68,0.3)`, background: D.errorDim, color: D.error,
+                fontSize: tokens.fontSizes.sm, fontWeight: 600, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', gap: 6,
               }}
             >
-              <TrashIcon size={15} color={tokens.colors.error} /> 삭제
+              <TrashIcon size={15} color={D.error} /> 삭제
             </button>
           )}
         </div>
@@ -212,8 +231,8 @@ const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete
 };
 
 const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <div style={{ background: tokens.colors.surface, borderRadius: tokens.borderRadius.xl, border: `1px solid ${tokens.colors.border}`, padding: '22px 24px', boxShadow: tokens.shadows.card, marginBottom: 16 }}>
-    <h2 style={{ fontSize: tokens.fontSizes.md, fontWeight: tokens.fontWeights.bold, color: tokens.colors.textPrimary, margin: '0 0 16px' }}>{title}</h2>
+  <div style={{ background: D.card, borderRadius: 12, border: `1px solid ${D.border}`, padding: '22px 24px', marginBottom: 16 }}>
+    <h2 style={{ fontSize: tokens.fontSizes.md, fontWeight: 700, color: D.heading, margin: '0 0 18px', letterSpacing: '-0.3px' }}>{title}</h2>
     {children}
   </div>
 );

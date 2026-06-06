@@ -13,15 +13,30 @@ interface CompanyViewProps {
   onUpdate: (company: Company) => void;
 }
 
+const D = {
+  bg: '#000000',
+  card: '#0f0f0f',
+  section: '#0a0a0a',
+  border: 'rgba(255,255,255,0.08)',
+  borderHover: 'rgba(255,255,255,0.18)',
+  heading: '#ffffff',
+  body: '#a1a1aa',
+  muted: '#52525b',
+  accent: '#0070f3',
+  accentDim: 'rgba(0,112,243,0.12)',
+  tag: 'rgba(255,255,255,0.06)',
+  tagText: '#a1a1aa',
+};
+
 const CompanyView: React.FC<CompanyViewProps> = ({ company, onBack, onManage, onUpdate }) => {
   const [following, setFollowing] = useState(false);
 
   if (!company) {
     return (
-      <div style={{ background: tokens.colors.background, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <div style={{ background: D.bg, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
         <div style={{ textAlign: 'center' }}>
-          <p style={{ fontSize: tokens.fontSizes.md, color: tokens.colors.textSecondary, marginBottom: 14 }}>회사를 찾을 수 없습니다.</p>
-          <button onClick={onBack} style={{ padding: '9px 18px', borderRadius: tokens.borderRadius.md, border: 'none', background: tokens.colors.primary, color: '#fff', fontSize: tokens.fontSizes.sm, fontWeight: tokens.fontWeights.semibold, cursor: 'pointer' }}>
+          <p style={{ fontSize: tokens.fontSizes.md, color: D.body, marginBottom: 16 }}>회사를 찾을 수 없습니다.</p>
+          <button onClick={onBack} style={{ padding: '9px 18px', borderRadius: 8, border: 'none', background: '#fff', color: '#000', fontSize: tokens.fontSizes.sm, fontWeight: 700, cursor: 'pointer' }}>
             회사 목록으로
           </button>
         </div>
@@ -37,37 +52,38 @@ const CompanyView: React.FC<CompanyViewProps> = ({ company, onBack, onManage, on
   };
 
   const metaRow = (icon: React.ReactNode, text: string) => (
-    <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: tokens.fontSizes.sm, color: tokens.colors.textSecondary }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: tokens.fontSizes.sm, color: D.body }}>
       {icon}{text}
     </span>
   );
 
   return (
-    <div style={{ background: tokens.colors.background, minHeight: '100vh' }}>
-      <div style={{ maxWidth: 760, margin: '0 auto', padding: '20px 20px 60px' }}>
+    <div style={{ background: D.bg, minHeight: '100vh' }}>
+      <div style={{ maxWidth: 780, margin: '0 auto', padding: '20px 20px 80px' }}>
         <button
           onClick={onBack}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: tokens.colors.textSecondary, fontSize: tokens.fontSizes.sm, cursor: 'pointer', padding: '0 0 16px' }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: D.body, fontSize: tokens.fontSizes.sm, cursor: 'pointer', padding: '0 0 20px' }}
         >
-          <ArrowLeftIcon size={16} color={tokens.colors.textSecondary} /> 회사 목록
+          <ArrowLeftIcon size={16} color={D.body} /> 회사 목록
         </button>
 
         {/* Header card */}
         <div style={{
-          background: tokens.colors.surface, borderRadius: tokens.borderRadius.xl,
-          border: `1px solid ${tokens.colors.border}`, boxShadow: tokens.shadows.card,
-          overflow: 'hidden', marginBottom: 16,
+          background: D.card, borderRadius: 12,
+          border: `1px solid ${D.border}`,
+          overflow: 'hidden', marginBottom: 14,
         }}>
-          <div style={{ height: 120, background: c.coverGradient, position: 'relative', zIndex: 0 }} />
-          <div style={{ padding: '0 24px 22px' }}>
+          {/* Cover */}
+          <div style={{ height: 120, background: c.coverGradient, position: 'relative', zIndex: 0, opacity: 0.7 }} />
+          <div style={{ padding: '0 24px 24px' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
               {/* Logo */}
               <div style={{
                 marginTop: -36, position: 'relative', zIndex: 2,
-                width: 80, height: 80, borderRadius: tokens.borderRadius.xl, background: c.logoGradient,
-                border: `3px solid ${tokens.colors.surface}`, boxShadow: tokens.shadows.md,
+                width: 80, height: 80, borderRadius: 12, background: c.logoGradient,
+                border: `3px solid ${D.card}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontWeight: tokens.fontWeights.extrabold, fontSize: 34,
+                color: '#fff', fontWeight: 800, fontSize: 34,
               }}>
                 {c.name.trim()[0]}
               </div>
@@ -76,11 +92,12 @@ const CompanyView: React.FC<CompanyViewProps> = ({ company, onBack, onManage, on
                 <button
                   onClick={toggleFollow}
                   style={{
-                    padding: '8px 18px', borderRadius: tokens.borderRadius.md, fontSize: tokens.fontSizes.sm,
-                    fontWeight: tokens.fontWeights.semibold, cursor: 'pointer',
-                    border: following ? `1.5px solid ${tokens.colors.border}` : 'none',
-                    background: following ? 'transparent' : tokens.colors.primary,
-                    color: following ? tokens.colors.textSecondary : '#fff',
+                    padding: '8px 18px', borderRadius: 8, fontSize: tokens.fontSizes.sm,
+                    fontWeight: 600, cursor: 'pointer',
+                    border: `1px solid ${following ? D.border : 'transparent'}`,
+                    background: following ? 'rgba(255,255,255,0.05)' : '#fff',
+                    color: following ? D.body : '#000',
+                    transition: `all ${tokens.transitions.fast}`,
                   }}
                 >
                   {following ? '팔로잉' : '+ 팔로우'}
@@ -89,36 +106,36 @@ const CompanyView: React.FC<CompanyViewProps> = ({ company, onBack, onManage, on
                   <button
                     onClick={() => onManage(c.id)}
                     style={{
-                      padding: '8px 16px', borderRadius: tokens.borderRadius.md, fontSize: tokens.fontSizes.sm,
-                      fontWeight: tokens.fontWeights.semibold, cursor: 'pointer',
-                      border: `1.5px solid ${tokens.colors.primary}`, background: 'transparent', color: tokens.colors.primary,
+                      padding: '8px 16px', borderRadius: 8, fontSize: tokens.fontSizes.sm,
+                      fontWeight: 600, cursor: 'pointer',
+                      border: `1px solid ${D.border}`, background: 'none', color: D.body,
                       display: 'flex', alignItems: 'center', gap: 6,
                     }}
                   >
-                    <PencilIcon size={14} color={tokens.colors.primary} /> 페이지 관리
+                    <PencilIcon size={14} color={D.body} /> 페이지 관리
                   </button>
                 )}
               </div>
             </div>
 
-            <h1 style={{ fontSize: tokens.fontSizes.xxl, fontWeight: tokens.fontWeights.extrabold, color: tokens.colors.textPrimary, margin: '10px 0 4px', letterSpacing: '-0.5px' }}>
+            <h1 style={{ fontSize: 'clamp(20px, 4vw, 32px)', fontWeight: 800, color: D.heading, margin: '12px 0 4px', letterSpacing: '-1px' }}>
               {c.name}
             </h1>
-            <p style={{ fontSize: tokens.fontSizes.md, color: tokens.colors.textSecondary, margin: '0 0 12px' }}>{c.tagline}</p>
+            <p style={{ fontSize: tokens.fontSizes.md, color: D.body, margin: '0 0 14px' }}>{c.tagline}</p>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginBottom: 8 }}>
-              {metaRow(<BuildingIcon size={14} color={tokens.colors.textMuted} />, c.industry)}
-              {metaRow(<UsersIcon size={14} color={tokens.colors.textMuted} />, c.size)}
-              {metaRow(<LocationIcon size={14} color={tokens.colors.textMuted} />, c.location)}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 10 }}>
+              {metaRow(<BuildingIcon size={13} color={D.muted} />, c.industry)}
+              {metaRow(<UsersIcon size={13} color={D.muted} />, c.size)}
+              {metaRow(<LocationIcon size={13} color={D.muted} />, c.location)}
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center' }}>
               {c.website && (
-                <a href={c.website} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: tokens.fontSizes.sm, color: tokens.colors.primary, textDecoration: 'none', fontWeight: tokens.fontWeights.medium }}>
-                  <WebsiteIcon size={14} color={tokens.colors.primary} /> 웹사이트
+                <a href={c.website} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: tokens.fontSizes.sm, color: '#5b9cf6', textDecoration: 'none', fontWeight: 500 }}>
+                  <WebsiteIcon size={13} color="#5b9cf6" /> 웹사이트
                 </a>
               )}
-              <span style={{ fontSize: tokens.fontSizes.sm, color: tokens.colors.textMuted }}>
-                <strong style={{ color: tokens.colors.primary }}>{c.followers.toLocaleString()}</strong> 팔로워 · 설립 {c.founded}
+              <span style={{ fontSize: tokens.fontSizes.sm, color: D.muted }}>
+                <strong style={{ color: D.body }}>{c.followers.toLocaleString()}</strong> 팔로워 · 설립 {c.founded}
               </span>
             </div>
           </div>
@@ -130,7 +147,7 @@ const CompanyView: React.FC<CompanyViewProps> = ({ company, onBack, onManage, on
             c.about.split('\n').map((line, i) =>
               line.trim() === ''
                 ? <div key={i} style={{ height: 8 }} />
-                : <p key={i} style={{ fontSize: tokens.fontSizes.sm, color: tokens.colors.textSecondary, lineHeight: 1.75, margin: '0 0 4px' }}>{line}</p>,
+                : <p key={i} style={{ fontSize: tokens.fontSizes.sm, color: D.body, lineHeight: 1.8, margin: '0 0 4px' }}>{line}</p>,
             )
           ) : (
             <Empty text="회사 소개가 아직 없어요." />
@@ -143,21 +160,22 @@ const CompanyView: React.FC<CompanyViewProps> = ({ company, onBack, onManage, on
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {c.openings.map(o => (
                 <div key={o.id} style={{
-                  border: `1px solid ${tokens.colors.border}`, borderRadius: tokens.borderRadius.lg,
+                  border: `1px solid ${D.border}`, borderRadius: 8,
                   padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+                  background: D.section,
                 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: tokens.fontWeights.semibold, color: tokens.colors.textPrimary }}>{o.title}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: tokens.fontSizes.xs, color: tokens.colors.textMuted, margin: '3px 0 8px' }}>
-                      <MapPinIcon size={12} color={tokens.colors.textMuted} /> {o.location}
+                    <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading }}>{o.title}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: tokens.fontSizes.xs, color: D.muted, margin: '4px 0 10px' }}>
+                      <MapPinIcon size={12} color={D.muted} /> {o.location}
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                       {o.tags.map(t => (
-                        <span key={t} style={{ backgroundColor: tokens.colors.tag, color: tokens.colors.tagText, padding: '2px 8px', borderRadius: tokens.borderRadius.full, fontSize: '10px', fontWeight: tokens.fontWeights.medium }}>{t}</span>
+                        <span key={t} style={{ background: D.tag, color: D.tagText, padding: '2px 8px', borderRadius: 999, fontSize: '10px', fontWeight: 500, border: `1px solid ${D.border}` }}>{t}</span>
                       ))}
                     </div>
                   </div>
-                  <button style={{ flexShrink: 0, padding: '7px 16px', borderRadius: tokens.borderRadius.md, border: `1.5px solid ${tokens.colors.border}`, background: 'none', fontSize: tokens.fontSizes.xs, fontWeight: tokens.fontWeights.semibold, color: tokens.colors.textSecondary, cursor: 'pointer' }}>
+                  <button style={{ flexShrink: 0, padding: '7px 16px', borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', fontSize: tokens.fontSizes.xs, fontWeight: 600, color: D.body, cursor: 'pointer' }}>
                     지원하기
                   </button>
                 </div>
@@ -173,12 +191,12 @@ const CompanyView: React.FC<CompanyViewProps> = ({ company, onBack, onManage, on
           {c.members.length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
               {c.members.map(m => (
-                <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, border: `1px solid ${tokens.colors.border}`, borderRadius: tokens.borderRadius.lg, padding: '10px 12px' }}>
+                <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, border: `1px solid ${D.border}`, borderRadius: 8, padding: '10px 12px', background: D.section }}>
                   <img src={m.avatar} alt={m.name} style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0 }} />
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: tokens.fontWeights.semibold, color: tokens.colors.textPrimary }}>{m.name}</div>
-                    <div style={{ fontSize: tokens.fontSizes.xs, color: tokens.colors.textMuted, display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <BriefcaseIcon size={11} color={tokens.colors.textMuted} /> {m.role}
+                    <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading }}>{m.name}</div>
+                    <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <BriefcaseIcon size={10} color={D.muted} /> {m.role}
                     </div>
                   </div>
                 </div>
@@ -194,14 +212,14 @@ const CompanyView: React.FC<CompanyViewProps> = ({ company, onBack, onManage, on
 };
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <div style={{ background: tokens.colors.surface, borderRadius: tokens.borderRadius.xl, border: `1px solid ${tokens.colors.border}`, padding: '22px 24px', boxShadow: tokens.shadows.card, marginBottom: 14 }}>
-    <h2 style={{ fontSize: tokens.fontSizes.md, fontWeight: tokens.fontWeights.bold, color: tokens.colors.textPrimary, margin: '0 0 14px' }}>{title}</h2>
+  <div style={{ background: D.card, borderRadius: 12, border: `1px solid ${D.border}`, padding: '22px 24px', marginBottom: 12 }}>
+    <h2 style={{ fontSize: tokens.fontSizes.md, fontWeight: 700, color: D.heading, margin: '0 0 14px', letterSpacing: '-0.3px' }}>{title}</h2>
     {children}
   </div>
 );
 
 const Empty: React.FC<{ text: string }> = ({ text }) => (
-  <div style={{ fontSize: tokens.fontSizes.sm, color: tokens.colors.textMuted, padding: '14px', textAlign: 'center', border: `1px dashed ${tokens.colors.border}`, borderRadius: tokens.borderRadius.lg, background: tokens.colors.surfaceAlt }}>
+  <div style={{ fontSize: tokens.fontSizes.sm, color: D.muted, padding: '16px', textAlign: 'center', border: `1px dashed rgba(255,255,255,0.06)`, borderRadius: 8 }}>
     {text}
   </div>
 );
