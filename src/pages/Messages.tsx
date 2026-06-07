@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { tokens } from '../tokens';
-import { SendIcon, ArrowLeftIcon, PencilIcon, CloseIcon } from '../components/Icons';
+import { SendIcon, ArrowLeftIcon, PencilIcon, TrashIcon, CloseIcon } from '../components/Icons';
 import { exploreProfiles, type ExploreProfile } from '../data/defaultData';
 
 const D = {
@@ -19,7 +19,43 @@ interface Message {
   text: string;
   from: 'me' | 'them';
   time: string;
+  deleted?: boolean;
+  edited?: boolean;
 }
+
+/* ── Inline icon components ── */
+const CopyIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="4" y="4" width="8" height="8" rx="1.5" />
+    <path d="M1 9V2a1 1 0 011-1h7" />
+  </svg>
+);
+
+const ActionBtn: React.FC<{
+  title: string; onClick: () => void;
+  active?: boolean; danger?: boolean; children: React.ReactNode;
+}> = ({ title, onClick, active, danger, children }) => (
+  <button
+    title={title}
+    onClick={e => { e.stopPropagation(); onClick(); }}
+    style={{
+      background: 'none', border: 'none', borderRadius: 6,
+      width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      cursor: 'pointer', color: active ? '#22c55e' : danger ? '#f87171' : '#52525b',
+      transition: 'color 0.1s, background 0.1s', flexShrink: 0,
+    }}
+    onMouseEnter={e => {
+      e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
+      if (!active) e.currentTarget.style.color = danger ? '#ef4444' : '#d4d4d8';
+    }}
+    onMouseLeave={e => {
+      e.currentTarget.style.background = 'none';
+      e.currentTarget.style.color = active ? '#22c55e' : danger ? '#f87171' : '#52525b';
+    }}
+  >
+    {children}
+  </button>
+);
 
 interface Conversation {
   id: string;
@@ -50,6 +86,10 @@ const Messages: React.FC = () => {
   const [input, setInput] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 700);
   const [showNewMsg, setShowNewMsg] = useState(false);
+  const [hoveredMsg, setHoveredMsg] = useState<string | null>(null);
+  const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
+  const [copiedMsgId, setCopiedMsgId] = useState<string | null>(null);
   const [recipientQuery, setRecipientQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<ExploreProfile | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -164,6 +204,40 @@ const Messages: React.FC = () => {
     setConversations(prev => [newConv, ...prev]);
     setActiveId(cid);
     closeNewMsg();
+  };
+
+  const copyMsg = (id: string, text: string) => {
+    navigator.clipboard.writeText(text).catch(() => {});
+    setCopiedMsgId(id);
+    setTimeout(() => setCopiedMsgId(null), 1500);
+  };
+
+  const startEdit = (msg: Message) => {
+    setEditingMsgId(msg.id);
+    setEditText(msg.text);
+    setHoveredMsg(null);
+  };
+
+  const saveEdit = (convId: string, msgId: string) => {
+    const text = editText.trim();
+    if (!text) return;
+    setConversations(prev => prev.map(c =>
+      c.id === convId
+        ? { ...c, messages: c.messages.map(m => m.id === msgId ? { ...m, text, edited: true } : m) }
+        : c
+    ));
+    setEditingMsgId(null);
+    setEditText('');
+  };
+
+  const deleteMsg = (convId: string, msgId: string) => {
+    setConversations(prev => prev.map(c => {
+      if (c.id !== convId) return c;
+      const msgs = c.messages.map(m => m.id === msgId ? { ...m, deleted: true } : m);
+      const lastVisible = [...msgs].reverse().find(m => !m.deleted);
+      return { ...c, messages: msgs, lastMessage: lastVisible?.text ?? '' };
+    }));
+    setHoveredMsg(null);
   };
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -421,29 +495,112 @@ const Messages: React.FC = () => {
           const isMe = msg.from === 'me';
           const prevFrom = idx > 0 ? active.messages[idx - 1].from : null;
           const showAvatar = !isMe && prevFrom !== 'them';
+          const isHovered = hoveredMsg === msg.id;
+          const isEditing = editingMsgId === msg.id;
+
+          const actionBar = !msg.deleted && isHovered && !isEditing && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 1, alignSelf: 'center',
+              background: '#1a1a1a', border: `1px solid rgba(255,255,255,0.09)`,
+              borderRadius: 999, padding: '2px 4px', flexShrink: 0,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+            }}>
+              <ActionBtn title={copiedMsgId === msg.id ? '복사됨' : '복사'} onClick={() => copyMsg(msg.id, msg.text)} active={copiedMsgId === msg.id}>
+                <CopyIcon />
+              </ActionBtn>
+              {isMe && (
+                <>
+                  <ActionBtn title="수정" onClick={() => startEdit(msg)}>
+                    <PencilIcon size={13} color="currentColor" />
+                  </ActionBtn>
+                  <ActionBtn title="삭제" onClick={() => deleteMsg(active.id, msg.id)} danger>
+                    <TrashIcon size={13} color="currentColor" />
+                  </ActionBtn>
+                </>
+              )}
+            </div>
+          );
+
           return (
-            <div key={msg.id} style={{ display: 'flex', flexDirection: isMe ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 8 }}>
+            <div
+              key={msg.id}
+              onMouseEnter={() => !isEditing && setHoveredMsg(msg.id)}
+              onMouseLeave={() => setHoveredMsg(null)}
+              style={{ display: 'flex', flexDirection: isMe ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 8 }}
+            >
               {!isMe && (
                 <div style={{ width: 32, flexShrink: 0 }}>
                   {showAvatar && <img src={active.avatar} alt="" style={{ width: 32, height: 32, borderRadius: '50%' }} />}
                 </div>
               )}
+
+              {/* Action bar for their messages: appears to the RIGHT of the bubble */}
+              {!isMe && actionBar}
+
               <div style={{ maxWidth: '72%', display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 3 }}>
-                <div style={{
-                  padding: '10px 14px', borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                  background: isMe ? D.myBubble : D.theirBubble,
-                  color: isMe ? D.myBubbleText : D.theirBubbleText,
-                  fontSize: tokens.fontSizes.sm, lineHeight: 1.55,
-                }}>
-                  {msg.text}
-                </div>
-                <div style={{ fontSize: '10px', color: D.muted, paddingInline: 4, display: 'flex', gap: 6, alignItems: 'center' }}>
-                  {isMe && active.lastReadMsgId === msg.id && (
+                {isEditing ? (
+                  /* Inline edit mode */
+                  <div style={{ width: '100%', minWidth: 220 }}>
+                    <textarea
+                      autoFocus
+                      value={editText}
+                      onChange={e => setEditText(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); saveEdit(active.id, msg.id); }
+                        if (e.key === 'Escape') { setEditingMsgId(null); setEditText(''); }
+                      }}
+                      style={{
+                        width: '100%', boxSizing: 'border-box',
+                        background: '#111b33', border: '1px solid rgba(0,112,243,0.5)',
+                        borderRadius: '14px 14px 4px 14px',
+                        padding: '10px 14px', color: '#fff',
+                        fontSize: tokens.fontSizes.sm, lineHeight: 1.55, fontFamily: 'inherit',
+                        resize: 'none', outline: 'none', minHeight: 44,
+                      }}
+                    />
+                    <div style={{ display: 'flex', gap: 6, marginTop: 5, justifyContent: 'flex-end' }}>
+                      <button
+                        onClick={() => { setEditingMsgId(null); setEditText(''); }}
+                        style={{ padding: '4px 11px', borderRadius: 6, border: `1px solid rgba(255,255,255,0.1)`, background: 'none', color: '#71717a', fontSize: 11, fontFamily: 'inherit', cursor: 'pointer' }}
+                      >
+                        취소
+                      </button>
+                      <button
+                        onClick={() => saveEdit(active.id, msg.id)}
+                        disabled={!editText.trim()}
+                        style={{ padding: '4px 11px', borderRadius: 6, border: 'none', background: editText.trim() ? D.accent : 'rgba(0,112,243,0.2)', color: editText.trim() ? '#fff' : 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: editText.trim() ? 'pointer' : 'default' }}
+                      >
+                        저장
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Normal bubble */
+                  <div style={{
+                    padding: '10px 14px',
+                    borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                    background: msg.deleted ? 'transparent' : isMe ? D.myBubble : D.theirBubble,
+                    color: msg.deleted ? D.muted : isMe ? D.myBubbleText : D.theirBubbleText,
+                    border: msg.deleted ? `1px solid rgba(255,255,255,0.07)` : 'none',
+                    fontSize: tokens.fontSizes.sm, lineHeight: 1.55,
+                    fontStyle: msg.deleted ? 'italic' : 'normal',
+                  }}>
+                    {msg.deleted ? '삭제된 메시지입니다' : msg.text}
+                  </div>
+                )}
+                <div style={{ fontSize: '10px', color: D.muted, paddingInline: 4, display: 'flex', gap: 5, alignItems: 'center' }}>
+                  {isMe && active.lastReadMsgId === msg.id && !msg.deleted && (
                     <span style={{ color: D.accent, fontWeight: 600 }}>읽음</span>
+                  )}
+                  {!msg.deleted && msg.edited && !isEditing && (
+                    <span>수정됨</span>
                   )}
                   {msg.time}
                 </div>
               </div>
+
+              {/* Action bar for my messages: appears to the LEFT of the bubble (row-reverse) */}
+              {isMe && actionBar}
             </div>
           );
         })}
