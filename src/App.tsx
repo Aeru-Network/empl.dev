@@ -233,7 +233,16 @@ const App: React.FC = () => {
       )}
 
       {page === 'postDetail' && (
-        <PostDetail postId={activePostId} profile={profile} onBack={() => navigate('profile')} />
+        <PostDetail
+          postId={activePostId}
+          profile={profile}
+          onBack={() => navigate('profile')}
+          onEdit={() => handleEditPost(activePostId)}
+          onDelete={() => {
+            setProfile(prev => prev ? { ...prev, posts: prev.posts.filter(p => p.id !== activePostId) } : prev);
+            navigate('profile');
+          }}
+        />
       )}
 
       {page === 'postEditor' && (

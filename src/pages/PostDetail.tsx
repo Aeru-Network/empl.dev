@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { tokens } from '../tokens';
 import { type ProfileData } from '../data/defaultData';
-import { HeartIcon, EyeIcon, ClockIcon, ArrowLeftIcon, SendIcon } from '../components/Icons';
+import { HeartIcon, EyeIcon, ClockIcon, ArrowLeftIcon, SendIcon, PencilIcon, TrashIcon } from '../components/Icons';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 
 interface PostDetailProps {
   postId: string;
   profile: ProfileData | null;
   onBack: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 interface Comment {
@@ -29,9 +31,10 @@ const D = {
   input: '#0f0f0f',
 };
 
-const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
+const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack, onEdit, onDelete }) => {
   const post = profile?.posts.find(p => p.id === postId) ?? null;
   const [liked, setLiked] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState('');
   const sendLock = React.useRef(false);
@@ -78,19 +81,77 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack }) => {
     <div style={{ background: D.bg, minHeight: '100vh' }}>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '28px 24px 100px' }}>
 
-        {/* Back */}
-        <button
-          onClick={onBack}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 7, background: 'none', border: 'none',
-            color: D.muted, fontSize: tokens.fontSizes.sm, cursor: 'pointer', padding: 0, marginBottom: 36,
-            transition: `color ${tokens.transitions.fast}`, fontFamily: 'inherit',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.color = D.body)}
-          onMouseLeave={e => (e.currentTarget.style.color = D.muted)}
-        >
-          <ArrowLeftIcon size={15} color="currentColor" /> 뒤로가기
-        </button>
+        {/* Back + actions */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
+          <button
+            onClick={onBack}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7, background: 'none', border: 'none',
+              color: D.muted, fontSize: tokens.fontSizes.sm, cursor: 'pointer', padding: 0,
+              transition: `color ${tokens.transitions.fast}`, fontFamily: 'inherit',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = D.body)}
+            onMouseLeave={e => (e.currentTarget.style.color = D.muted)}
+          >
+            <ArrowLeftIcon size={15} color="currentColor" /> 뒤로가기
+          </button>
+          {(onEdit || onDelete) && (
+            <div style={{ display: 'flex', gap: 8 }}>
+              {onEdit && (
+                <button
+                  onClick={onEdit}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '7px 13px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
+                    border: `1px solid ${D.border}`, background: 'transparent',
+                    color: D.body, fontSize: tokens.fontSizes.xs, fontWeight: 500,
+                    transition: `all ${tokens.transitions.fast}`,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = D.heading; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = D.body; }}
+                >
+                  <PencilIcon size={13} color="currentColor" /> 수정
+                </button>
+              )}
+              {onDelete && !confirmDelete && (
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '7px 13px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
+                    border: '1px solid rgba(239,68,68,0.25)', background: 'transparent',
+                    color: '#f87171', fontSize: tokens.fontSizes.xs, fontWeight: 500,
+                    transition: `all ${tokens.transitions.fast}`,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <TrashIcon size={13} color="currentColor" /> 삭제
+                </button>
+              )}
+              {onDelete && confirmDelete && (
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    style={{
+                      padding: '7px 12px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
+                      border: `1px solid ${D.border}`, background: 'transparent',
+                      color: D.muted, fontSize: tokens.fontSizes.xs, fontWeight: 500,
+                    }}
+                  >취소</button>
+                  <button
+                    onClick={onDelete}
+                    style={{
+                      padding: '7px 12px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
+                      border: 'none', background: '#ef4444',
+                      color: '#fff', fontSize: tokens.fontSizes.xs, fontWeight: 600,
+                    }}
+                  >삭제 확인</button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Title */}
         <h1 style={{
