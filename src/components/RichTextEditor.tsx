@@ -44,7 +44,13 @@ const STYLES = `
 .empl-rte .ProseMirror ul { list-style: disc; padding-left: 1.5em; margin: 0.5em 0 1em; }
 .empl-rte .ProseMirror ol { list-style: decimal; padding-left: 1.5em; margin: 0.5em 0 1em; }
 .empl-rte .ProseMirror li { color: #d4d4d8; line-height: 1.75; margin-bottom: 4px; }
-.empl-rte .ProseMirror img { max-width: 100%; border-radius: 10px; margin: 0.8em 0; display: block; border: 1px solid rgba(255,255,255,0.08); cursor: default; }
+.empl-rte .ProseMirror img {
+  max-width: 100%; border-radius: 10px; margin: 0.8em 0; display: block;
+  border: 1px solid rgba(255,255,255,0.08); cursor: default; height: auto;
+}
+.empl-rte .ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid #3D7BFF; border-color: #3D7BFF;
+}
 .empl-rte .ProseMirror a { color: #3D7BFF; text-decoration: underline; cursor: pointer; }
 .empl-rte .ProseMirror hr { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 2em 0; }
 .empl-rte .ProseMirror p.is-editor-empty:first-child::before {
@@ -52,6 +58,23 @@ const STYLES = `
 }
 .empl-rte .ProseMirror.ProseMirror-focused { outline: none; }
 `;
+
+/* Custom Image extension with resizable width attribute */
+const ResizableImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: null,
+        renderHTML: (attrs) => {
+          if (!attrs.width) return {};
+          return { style: `width: ${attrs.width}; max-width: 100%; height: auto;` };
+        },
+        parseHTML: (el) => el.style.width || null,
+      },
+    };
+  },
+});
 
 interface RichTextEditorProps {
   content: string;
@@ -103,6 +126,8 @@ const OrderedListIcon = () => <svg width="13" height="11" viewBox="0 0 13 11" fi
 const ImageIcon = () => <svg width="14" height="12" viewBox="0 0 14 12" fill="none" stroke="currentColor" strokeWidth="1.2"><rect x="0.6" y="0.6" width="12.8" height="10.8" rx="1.5"/><circle cx="4.5" cy="4" r="1.2"/><path d="M0.6 8.5l3-3 2.5 2.5 2-2 3.5 4" strokeLinejoin="round"/></svg>;
 const LinkIcon = () => <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"><path d="M5.5 5a3 3 0 004 0l1.5-1.5A3 3 0 006.8 1L5.5 2.3"/><path d="M8.5 5a3 3 0 00-4 0L3 6.5A3 3 0 007.2 9L8.5 7.7"/></svg>;
 
+const SIZE_PRESETS = ['자동', '25%', '50%', '75%', '100%'] as const;
+
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content, onChange, placeholder = '내용을 입력하세요...', minHeight = 320,
 }) => {
@@ -116,7 +141,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       TextStyle,
       Color,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
-      Image.configure({ allowBase64: true, inline: false }),
+      ResizableImage.configure({ allowBase64: true, inline: false }),
       Placeholder.configure({ placeholder }),
       Link.configure({ openOnClick: false, HTMLAttributes: { target: '_blank', rel: 'noopener' } }),
     ],
@@ -149,9 +174,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     editor.chain().focus().setLink({ href: url }).run();
   }, [editor]);
 
+  const setImageWidth = useCallback((size: string) => {
+    if (!editor) return;
+    const width = size === '자동' ? null : size;
+    editor.chain().focus().updateAttributes('image', { width }).run();
+  }, [editor]);
+
   if (!editor) return null;
 
   const h = editor.isActive('heading', { level: 1 }) ? 1 : editor.isActive('heading', { level: 2 }) ? 2 : editor.isActive('heading', { level: 3 }) ? 3 : 0;
+  const imageSelected = editor.isActive('image');
+  const currentWidth = imageSelected ? (editor.getAttributes('image').width ?? '자동') : null;
 
   return (
     <>
@@ -221,6 +254,25 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             />
           </div>
           <Btn active={false} title="색상 초기화" onMouseDown={() => editor.chain().focus().unsetColor().run()} style={{ fontSize: 10, color: '#52525b' }}>✕</Btn>
+
+          {/* Image size presets — shown only when an image node is selected */}
+          {imageSelected && (
+            <>
+              <Divider />
+              <span style={{ fontSize: 10, color: '#52525b', marginRight: 2, flexShrink: 0 }}>이미지 크기</span>
+              {SIZE_PRESETS.map(size => (
+                <Btn
+                  key={size}
+                  active={(size === '자동' ? null : size) === currentWidth}
+                  title={`이미지 ${size}`}
+                  onMouseDown={() => setImageWidth(size)}
+                  style={{ fontSize: 10, minWidth: 28, padding: '4px 5px' }}
+                >
+                  {size}
+                </Btn>
+              ))}
+            </>
+          )}
         </div>
 
         {/* Editor area */}
