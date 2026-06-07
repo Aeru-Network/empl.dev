@@ -61,7 +61,7 @@ const MyPage: React.FC<MyPageProps> = ({ profile, companies, onNavigate, onIniti
 
   const myCompanies = companies.filter(c => c.isManaged);
   const today = new Date();
-  const greeting = today.getHours() < 12 ? '좋은 아침이에요' : today.getHours() < 18 ? '안녕하세요' : '안녕하세요';
+
 
   const quickActions = [
     { label: '내 프로필', desc: '프로필 보기 및 편집', onClick: () => onNavigate('profile') },
