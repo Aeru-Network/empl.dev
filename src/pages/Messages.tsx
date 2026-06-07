@@ -90,6 +90,7 @@ const Messages: React.FC = () => {
   const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [copiedMsgId, setCopiedMsgId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [recipientQuery, setRecipientQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<ExploreProfile | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -238,6 +239,7 @@ const Messages: React.FC = () => {
       return { ...c, messages: msgs, lastMessage: lastVisible?.text ?? '' };
     }));
     setHoveredMsg(null);
+    setDeleteConfirmId(null);
   };
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -246,7 +248,7 @@ const Messages: React.FC = () => {
 
   const handleNewMsgKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) startNewConversation();
-    if (e.key === 'Escape') closeNewMsg();
+    if (e.key === 'Escape') { closeNewMsg(); setDeleteConfirmId(null); }
     if (e.key === 'ArrowDown' && suggestions.length > 0) setShowSuggestions(true);
   };
 
@@ -513,7 +515,7 @@ const Messages: React.FC = () => {
                   <ActionBtn title="수정" onClick={() => startEdit(msg)}>
                     <PencilIcon size={13} color="currentColor" />
                   </ActionBtn>
-                  <ActionBtn title="삭제" onClick={() => deleteMsg(active.id, msg.id)} danger>
+                  <ActionBtn title="삭제" onClick={() => { setDeleteConfirmId(msg.id); setHoveredMsg(null); }} danger>
                     <TrashIcon size={13} color="currentColor" />
                   </ActionBtn>
                 </>
@@ -659,9 +661,52 @@ const Messages: React.FC = () => {
 
   const NAV_H = 56;
 
+  const deleteMsgTarget = deleteConfirmId ? active?.messages.find(m => m.id === deleteConfirmId) : null;
+
   return (
     <>
       {newMsgModal}
+
+      {/* Delete confirm modal */}
+      {deleteConfirmId && deleteMsgTarget && active && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+          onMouseDown={e => { if (e.target === e.currentTarget) setDeleteConfirmId(null); }}
+        >
+          <div style={{ background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '24px', width: '100%', maxWidth: 360, animation: 'fadeUp 0.18s ease' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+              <TrashIcon size={18} color="#ef4444" />
+            </div>
+            <p style={{ fontSize: tokens.fontSizes.md, fontWeight: 700, color: '#fff', margin: '0 0 6px' }}>메시지 삭제</p>
+            <p style={{ fontSize: tokens.fontSizes.sm, color: '#a1a1aa', margin: '0 0 8px', lineHeight: 1.5 }}>
+              이 메시지를 삭제하시겠어요?
+            </p>
+            {!deleteMsgTarget.deleted && (
+              <div style={{ background: '#1a1a1a', borderRadius: 10, padding: '10px 14px', marginBottom: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
+                <p style={{ fontSize: tokens.fontSizes.sm, color: '#71717a', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontStyle: 'italic' }}>
+                  "{deleteMsgTarget.text}"
+                </p>
+              </div>
+            )}
+            <p style={{ fontSize: tokens.fontSizes.xs, color: '#52525b', margin: '0 0 20px' }}>삭제 후에는 복구할 수 없습니다.</p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                style={{ flex: 1, padding: '11px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#a1a1aa', fontSize: tokens.fontSizes.sm, fontWeight: 500 }}
+              >
+                취소
+              </button>
+              <button
+                onClick={() => deleteMsg(active.id, deleteConfirmId)}
+                style={{ flex: 1, padding: '11px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', border: 'none', background: '#ef4444', color: '#fff', fontSize: tokens.fontSizes.sm, fontWeight: 700 }}
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ height: `calc(100vh - ${NAV_H}px)`, background: D.bg, display: 'flex', overflow: 'hidden' }}>
         {isMobile ? (
           activeId ? thread : sidebar
