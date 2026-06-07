@@ -674,9 +674,6 @@ const Messages: React.FC = () => {
           onMouseDown={e => { if (e.target === e.currentTarget) setDeleteConfirmId(null); }}
         >
           <div style={{ background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '24px', width: '100%', maxWidth: 360, animation: 'fadeUp 0.18s ease' }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-              <TrashIcon size={18} color="#ef4444" />
-            </div>
             <p style={{ fontSize: tokens.fontSizes.md, fontWeight: 700, color: '#fff', margin: '0 0 6px' }}>메시지 삭제</p>
             <p style={{ fontSize: tokens.fontSizes.sm, color: '#a1a1aa', margin: '0 0 8px', lineHeight: 1.5 }}>
               이 메시지를 삭제하시겠어요?
