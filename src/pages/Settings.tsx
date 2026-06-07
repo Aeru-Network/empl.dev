@@ -3,6 +3,7 @@ import { tokens } from '../tokens';
 import type { ProfileData, Experience, Project, Post } from '../data/defaultData';
 import { SparklesIcon, PlusIcon, CloseIcon, CheckIcon, TrashIcon, PencilIcon } from '../components/Icons';
 import LocationInput from '../components/LocationInput';
+import RichTextEditor from '../components/RichTextEditor';
 
 interface SettingsProps {
   profile: ProfileData | null;
@@ -457,7 +458,7 @@ const ExpForm: React.FC<{
 
 const emptyProj = (): Omit<Project, 'id'> => ({
   title: '', description: '', longDescription: '', techStack: [],
-  githubUrl: '', demoUrl: '', stars: undefined, imageGradient: GRADIENT_PRESETS[0],
+  githubUrl: '', demoUrl: '', stars: undefined, imageGradient: GRADIENT_PRESETS[0], imageUrl: undefined,
 });
 
 const ProjectEditor: React.FC<{ projects: Project[]; onChange: (projs: Project[]) => void }> = ({ projects, onChange }) => {
@@ -466,7 +467,7 @@ const ProjectEditor: React.FC<{ projects: Project[]; onChange: (projs: Project[]
 
   const startNew = () => { setDraft(emptyProj()); setEditId('new'); };
   const startEdit = (p: Project) => {
-    setDraft({ title: p.title, description: p.description, longDescription: p.longDescription, techStack: [...p.techStack], githubUrl: p.githubUrl ?? '', demoUrl: p.demoUrl ?? '', stars: p.stars, imageGradient: p.imageGradient });
+    setDraft({ title: p.title, description: p.description, longDescription: p.longDescription, techStack: [...p.techStack], githubUrl: p.githubUrl ?? '', demoUrl: p.demoUrl ?? '', stars: p.stars, imageGradient: p.imageGradient, imageUrl: p.imageUrl });
     setEditId(p.id);
   };
   const cancel = () => setEditId(null);
@@ -531,6 +532,7 @@ const ProjForm: React.FC<{
   blur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }> = ({ draft, onChange, onSave, onCancel, focus, blur }) => {
   const [techInput, setTechInput] = useState('');
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const addTech = () => {
     const v = techInput.trim();
@@ -538,11 +540,31 @@ const ProjForm: React.FC<{
     setTechInput('');
   };
 
+  const handleBannerFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => onChange({ ...draft, imageUrl: ev.target?.result as string });
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
   return (
     <div style={{ border: `1px solid ${D.borderFocus}`, borderRadius: 8, padding: '14px', display: 'flex', flexDirection: 'column', gap: 10, background: 'rgba(255,255,255,0.02)' }}>
       <input style={{ ...inputBase }} placeholder="프로젝트명" value={draft.title} onChange={e => onChange({ ...draft, title: e.target.value })} onFocus={focus} onBlur={blur} />
       <textarea style={{ ...inputBase, resize: 'vertical', lineHeight: 1.6, minHeight: 60 }} placeholder="짧은 설명 (카드에 표시)" value={draft.description} onChange={e => onChange({ ...draft, description: e.target.value })} onFocus={focus} onBlur={blur} />
-      <textarea style={{ ...inputBase, resize: 'vertical', lineHeight: 1.6, minHeight: 90 }} placeholder="상세 설명 (마크다운 지원)" value={draft.longDescription} onChange={e => onChange({ ...draft, longDescription: e.target.value })} onFocus={focus} onBlur={blur} />
+
+      {/* Long description - rich text editor */}
+      <div>
+        <div style={{ ...labelStyle, marginBottom: 8 }}>상세 설명</div>
+        <RichTextEditor
+          content={draft.longDescription}
+          onChange={html => onChange({ ...draft, longDescription: html })}
+          placeholder="프로젝트 상세 설명을 입력하세요 (이미지, 서식 지원)"
+          minHeight={160}
+        />
+      </div>
+
       <div>
         <div style={{ display: 'flex', gap: 8 }}>
           <input style={{ ...inputBase, flex: 1 }} placeholder="기술 스택 (Enter로 추가)" value={techInput} onChange={e => setTechInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTech(); } }} onFocus={focus} onBlur={blur} />
@@ -568,14 +590,42 @@ const ProjForm: React.FC<{
         <input style={{ ...inputBase, flex: 1 }} placeholder="데모 URL (선택)" value={draft.demoUrl ?? ''} onChange={e => onChange({ ...draft, demoUrl: e.target.value })} onFocus={focus} onBlur={blur} />
       </div>
       <input style={{ ...inputBase }} placeholder="GitHub Stars (선택)" type="number" value={draft.stars ?? ''} onChange={e => onChange({ ...draft, stars: e.target.value ? Number(e.target.value) : undefined })} onFocus={focus} onBlur={blur} />
+
+      {/* Banner: gradient presets + photo upload */}
       <div>
-        <div style={labelStyle}>배경 색상</div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {GRADIENT_PRESETS.map(g => (
-            <button key={g} onClick={() => onChange({ ...draft, imageGradient: g })} style={{ width: 40, height: 28, borderRadius: 6, background: g, border: draft.imageGradient === g ? '2px solid #fff' : `2px solid transparent`, cursor: 'pointer', padding: 0 }} />
+        <div style={labelStyle}>배너</div>
+        {/* Preview */}
+        <div
+          onClick={() => bannerInputRef.current?.click()}
+          style={{
+            height: 72, borderRadius: 8, marginBottom: 10, cursor: 'pointer',
+            background: draft.imageUrl ? `url(${draft.imageUrl}) center/cover no-repeat` : draft.imageGradient,
+            border: '1px solid rgba(255,255,255,0.08)', position: 'relative', overflow: 'hidden',
+          }}
+        >
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: tokens.fontSizes.xs, color: 'rgba(255,255,255,0.9)', fontWeight: 600, background: 'rgba(0,0,0,0.5)', padding: '4px 12px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.15)' }}>
+              {draft.imageUrl ? '사진 변경' : '+ 사진 업로드'}
+            </span>
+          </div>
+        </div>
+        <input ref={bannerInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBannerFile} />
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+          {draft.imageUrl && (
+            <button
+              type="button"
+              onClick={() => onChange({ ...draft, imageUrl: undefined })}
+              style={{ fontSize: tokens.fontSizes.xs, color: '#f87171', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0', fontFamily: 'inherit' }}
+            >
+              사진 제거
+            </button>
+          )}
+          {!draft.imageUrl && GRADIENT_PRESETS.map(g => (
+            <button key={g} onClick={() => onChange({ ...draft, imageGradient: g })} style={{ width: 36, height: 22, borderRadius: 5, background: g, border: draft.imageGradient === g && !draft.imageUrl ? '2px solid #fff' : '2px solid transparent', cursor: 'pointer', padding: 0 }} />
           ))}
         </div>
       </div>
+
       <div style={{ display: 'flex', gap: 8 }}>
         <button onClick={onCancel} style={{ flex: 1, padding: '8px', borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', color: D.muted, fontSize: tokens.fontSizes.sm, cursor: 'pointer', fontWeight: 500 }}>취소</button>
         <button onClick={onSave} style={{ flex: 2, padding: '8px', borderRadius: 7, border: 'none', background: '#fff', color: '#000', fontSize: tokens.fontSizes.sm, cursor: 'pointer', fontWeight: 700 }}>저장</button>

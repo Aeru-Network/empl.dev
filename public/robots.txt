@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://empl.dev/sitemap.xml

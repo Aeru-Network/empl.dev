@@ -13,6 +13,7 @@ export interface Project {
   demoUrl?: string;
   stars?: number;
   imageGradient: string;
+  imageUrl?: string;
 }
 
 export interface Experience {

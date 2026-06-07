@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSEO } from './hooks/useSEO';
 import Nav from './components/Nav';
 import Landing from './pages/Landing';
 import Profile from './pages/Profile';
@@ -72,14 +73,17 @@ function loadCompanies(): Company[] {
 }
 
 const App: React.FC = () => {
-  const [page, setPage] = useState<Page>('landing');
+  const [loggedIn, setLoggedIn] = useState<boolean>(
+    () => localStorage.getItem(LOGGED_KEY) === '1' || loadProfile() !== null,
+  );
+  const [page, setPage] = useState<Page>(() =>
+    (localStorage.getItem(LOGGED_KEY) === '1' || loadProfile() !== null) ? 'home' : 'landing'
+  );
+  useSEO(page);
   const [activePostId, setActivePostId] = useState<string>('post-1');
 
   const [profile, setProfile] = useState<ProfileData | null>(loadProfile);
   const [companies, setCompanies] = useState<Company[]>(loadCompanies);
-  const [loggedIn, setLoggedIn] = useState<boolean>(
-    () => localStorage.getItem(LOGGED_KEY) === '1' || loadProfile() !== null,
-  );
 
   const [activeCompanyId, setActiveCompanyId] = useState<string | null>(null);
   const [editingCompanyId, setEditingCompanyId] = useState<string | null>(null);
@@ -100,7 +104,8 @@ const App: React.FC = () => {
   }, [loggedIn]);
 
   const navigate = (p: Page) => {
-    setPage(p);
+    const dest = p === 'landing' && loggedIn ? 'home' : p;
+    setPage(dest);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

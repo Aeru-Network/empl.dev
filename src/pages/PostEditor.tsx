@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { tokens } from '../tokens';
 import type { Post } from '../data/defaultData';
 import { ArrowLeftIcon, PlusIcon, CloseIcon, CheckIcon } from '../components/Icons';
+import RichTextEditor from '../components/RichTextEditor';
 
 interface PostEditorProps {
   post: Post | null;
@@ -25,7 +26,12 @@ const inputBase: React.CSSProperties = {
 
 const today = () => new Date().toISOString().split('T')[0];
 
-const estimateReadingTime = (text: string) => Math.max(1, Math.round(text.split(/\s+/).filter(Boolean).length / 200));
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+const estimateReadingTime = (html: string) =>
+  Math.max(1, Math.round(stripHtml(html).split(/\s+/).filter(Boolean).length / 200));
+
+const isEmptyContent = (html: string) =>
+  !html || html === '<p></p>' || stripHtml(html).length === 0;
 
 const PostEditor: React.FC<PostEditorProps> = ({ post, onSave, onCancel }) => {
   const [title, setTitle] = useState(post?.title ?? '');
@@ -44,13 +50,16 @@ const PostEditor: React.FC<PostEditorProps> = ({ post, onSave, onCancel }) => {
     setTagInput('');
   };
 
+  const canSave = title.trim().length > 0 && !isEmptyContent(content);
+
   const handleSave = () => {
-    if (!title.trim() || !content.trim()) return;
+    if (!canSave) return;
+    const autoExcerpt = excerpt.trim() || stripHtml(content).slice(0, 200).trim();
     const result: Post = {
       id: post?.id ?? 'post-' + Date.now(),
       title: title.trim(),
-      excerpt: excerpt.trim() || (content.trim().split('\n').find(l => l.trim() && !l.startsWith('#')) ?? ''),
-      content: content.trim(),
+      excerpt: autoExcerpt,
+      content: content,
       date: post?.date ?? today(),
       tags,
       likes: post?.likes ?? 0,
@@ -65,7 +74,7 @@ const PostEditor: React.FC<PostEditorProps> = ({ post, onSave, onCancel }) => {
 
   return (
     <div style={{ background: D.bg, minHeight: '100vh', padding: '32px 20px 80px' }}>
-      <div style={{ maxWidth: 680, margin: '0 auto' }}>
+      <div style={{ maxWidth: 780, margin: '0 auto' }}>
         <button onClick={onCancel} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: D.body, fontSize: tokens.fontSizes.sm, cursor: 'pointer', padding: '0 0 24px' }}>
           <ArrowLeftIcon size={15} color={D.body} /> 돌아가기
         </button>
@@ -134,23 +143,22 @@ const PostEditor: React.FC<PostEditorProps> = ({ post, onSave, onCancel }) => {
             />
           </div>
 
-          {/* Content */}
+          {/* Content - Rich Text Editor */}
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <label style={{ fontSize: tokens.fontSizes.xs, fontWeight: 600, color: D.body }}>본문 (마크다운)</label>
-              {content && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <label style={{ fontSize: tokens.fontSizes.xs, fontWeight: 600, color: D.body }}>본문</label>
+              {!isEmptyContent(content) && (
                 <span style={{ fontSize: tokens.fontSizes.xs, color: D.muted }}>
                   약 {estimateReadingTime(content)}분 읽기
                 </span>
               )}
             </div>
-            <textarea
-              style={{ ...inputBase, resize: 'vertical', lineHeight: 1.7, minHeight: 360, fontFamily: "'Fira Code', 'Consolas', monospace", fontSize: '13px' }}
-              placeholder={'# 제목\n\n본문을 마크다운으로 작성하세요.\n\n## 소제목\n\n- 항목 1\n- 항목 2\n\n```javascript\nconsole.log("Hello");\n```'}
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              onFocus={focus}
-              onBlur={blur}
+            <RichTextEditor
+              key={post?.id ?? 'new'}
+              content={content}
+              onChange={setContent}
+              placeholder="포스트 내용을 입력하세요. 이미지, 코드 블록, 헤딩 등 다양한 서식을 지원합니다."
+              minHeight={420}
             />
           </div>
 
@@ -164,17 +172,17 @@ const PostEditor: React.FC<PostEditorProps> = ({ post, onSave, onCancel }) => {
             </button>
             <button
               onClick={handleSave}
-              disabled={!title.trim() || !content.trim()}
+              disabled={!canSave}
               style={{
                 flex: 3, padding: '12px', borderRadius: 9, border: 'none',
-                background: saved ? '#10b981' : (!title.trim() || !content.trim() ? 'rgba(255,255,255,0.1)' : '#fff'),
-                color: saved ? '#fff' : (!title.trim() || !content.trim() ? D.muted : '#000'),
-                fontSize: tokens.fontSizes.md, fontWeight: 700, cursor: !title.trim() || !content.trim() ? 'not-allowed' : 'pointer',
+                background: saved ? '#10b981' : (!canSave ? 'rgba(255,255,255,0.1)' : '#fff'),
+                color: saved ? '#fff' : (!canSave ? D.muted : '#000'),
+                fontSize: tokens.fontSizes.md, fontWeight: 700, cursor: !canSave ? 'not-allowed' : 'pointer',
                 transition: `background ${tokens.transitions.normal}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
               }}
             >
-              <CheckIcon size={16} color={saved ? '#fff' : (!title.trim() || !content.trim() ? D.muted : '#000')} />
+              <CheckIcon size={16} color={saved ? '#fff' : (!canSave ? D.muted : '#000')} />
               {saved ? '저장 완료!' : isNew ? '게시하기' : '수정 완료'}
             </button>
           </div>

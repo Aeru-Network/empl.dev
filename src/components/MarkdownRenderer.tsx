@@ -55,7 +55,40 @@ const parseInline = (text: string): React.ReactNode => {
   return parts.length === 1 ? parts[0] : <>{parts}</>;
 };
 
+const HTML_RENDER_STYLES = `
+.empl-html-content { font-family: 'Inter', -apple-system, sans-serif; color: #d4d4d8; font-size: 15px; line-height: 1.8; }
+.empl-html-content > * + * { margin-top: 0.8em; }
+.empl-html-content h1 { font-size: 2em; font-weight: 800; color: #fff; letter-spacing: -0.5px; line-height: 1.2; margin: 1.4em 0 0.5em; }
+.empl-html-content h2 { font-size: 1.5em; font-weight: 700; color: #f4f4f5; line-height: 1.3; margin: 1.2em 0 0.4em; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.empl-html-content h3 { font-size: 1.2em; font-weight: 700; color: #e4e4e7; line-height: 1.35; margin: 1em 0 0.35em; }
+.empl-html-content p { margin: 0 0 1em; }
+.empl-html-content strong { color: #fff; font-weight: 700; }
+.empl-html-content em { font-style: italic; }
+.empl-html-content u { text-decoration: underline; }
+.empl-html-content s { text-decoration: line-through; color: #71717a; }
+.empl-html-content code:not(pre code) { background: rgba(249,115,22,0.1); color: #f97316; padding: 2px 6px; border-radius: 4px; font-size: 0.87em; font-family: 'Fira Code','Consolas',monospace; }
+.empl-html-content pre { background: #111; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 16px 20px; margin: 1.2em 0; overflow-x: auto; }
+.empl-html-content pre code { background: none; color: #e2e8f0; padding: 0; font-size: 13px; line-height: 1.65; font-family: 'Fira Code','Consolas',monospace; }
+.empl-html-content blockquote { border-left: 3px solid #0070f3; background: rgba(0,112,243,0.06); margin: 1.2em 0; padding: 10px 16px; border-radius: 0 8px 8px 0; }
+.empl-html-content ul { list-style: disc; padding-left: 1.5em; margin: 0.6em 0 1em; }
+.empl-html-content ol { list-style: decimal; padding-left: 1.5em; margin: 0.6em 0 1em; }
+.empl-html-content li { color: #d4d4d8; line-height: 1.75; margin-bottom: 5px; }
+.empl-html-content img { max-width: 100%; border-radius: 10px; margin: 1em 0; display: block; border: 1px solid rgba(255,255,255,0.08); }
+.empl-html-content a { color: #3D7BFF; text-decoration: underline; }
+.empl-html-content hr { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 2em 0; }
+`;
+
+const HTMLRenderer: React.FC<{ html: string }> = ({ html }) => (
+  <>
+    <style>{HTML_RENDER_STYLES}</style>
+    <div className="empl-html-content" dangerouslySetInnerHTML={{ __html: html }} />
+  </>
+);
+
 const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
+  if (content.trimStart().startsWith('<')) {
+    return <HTMLRenderer html={content} />;
+  }
   const lines = content.split('\n');
   const elements: React.ReactNode[] = [];
   let i = 0;
