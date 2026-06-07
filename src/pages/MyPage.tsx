@@ -2,9 +2,7 @@ import React from 'react';
 import { tokens } from '../tokens';
 import type { ProfileData, Company } from '../data/defaultData';
 import {
-  UserIcon, BuildingIcon, BriefcaseIcon, SettingsIcon, PencilIcon,
-  SparklesIcon, PlusIcon, ChevronDownIcon, CodeIcon, HomeIcon,
-  MessageIcon, SearchIcon,
+  PencilIcon, SparklesIcon, PlusIcon, ChevronDownIcon, CodeIcon, HomeIcon,
 } from '../components/Icons';
 
 type Page =
@@ -66,12 +64,12 @@ const MyPage: React.FC<MyPageProps> = ({ profile, companies, onNavigate, onIniti
   const greeting = today.getHours() < 12 ? '좋은 아침이에요' : today.getHours() < 18 ? '안녕하세요' : '안녕하세요';
 
   const quickActions = [
-    { label: '내 프로필', desc: '프로필 보기 및 편집', icon: <UserIcon size={20} color="#5b9cf6" />, color: '#0070f3', onClick: () => onNavigate('profile') },
-    { label: '개발자 탐색', desc: '다른 개발자 찾기', icon: <SearchIcon size={20} color="#34d399" />, color: '#10b981', onClick: () => onNavigate('explore') },
-    { label: '채용 둘러보기', desc: '맞춤 포지션 탐색', icon: <BriefcaseIcon size={20} color="#fb923c" />, color: '#f59e0b', onClick: () => onNavigate('jobs') },
-    { label: '메시지', desc: '받은 메시지 확인', icon: <MessageIcon size={20} color="#a78bfa" />, color: '#7c3aed', onClick: () => onNavigate('messages') },
-    { label: '회사 관리', desc: '기업 페이지 관리', icon: <BuildingIcon size={20} color="#38bdf8" />, color: '#0ea5e9', onClick: onManageCompanies },
-    { label: '설정', desc: '계정 및 프로필 설정', icon: <SettingsIcon size={20} color={D.body} />, color: '#52525b', onClick: () => onNavigate('settings') },
+    { label: '내 프로필', desc: '프로필 보기 및 편집', onClick: () => onNavigate('profile') },
+    { label: '개발자 탐색', desc: '다른 개발자 찾기', onClick: () => onNavigate('explore') },
+    { label: '채용 둘러보기', desc: '맞춤 포지션 탐색', onClick: () => onNavigate('jobs') },
+    { label: '메시지', desc: '받은 메시지 확인', onClick: () => onNavigate('messages') },
+    { label: '회사 관리', desc: '기업 페이지 관리', onClick: onManageCompanies },
+    { label: '설정', desc: '계정 및 프로필 설정', onClick: () => onNavigate('settings') },
   ];
 
   return (
@@ -105,19 +103,14 @@ const MyPage: React.FC<MyPageProps> = ({ profile, companies, onNavigate, onIniti
               onClick={a.onClick}
               style={{
                 background: D.card, borderRadius: 10, border: `1px solid ${D.border}`,
-                padding: '18px', cursor: 'pointer', textAlign: 'left',
-                display: 'flex', flexDirection: 'column', gap: 12, transition: `border-color ${tokens.transitions.fast}`,
+                padding: '18px 20px', cursor: 'pointer', textAlign: 'left',
+                display: 'flex', flexDirection: 'column', gap: 6, transition: `border-color ${tokens.transitions.fast}`,
               }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = D.borderHover)}
               onMouseLeave={e => (e.currentTarget.style.borderColor = D.border)}
             >
-              <div style={{ width: 40, height: 40, borderRadius: 9, background: a.color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {a.icon}
-              </div>
-              <div>
-                <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 700, color: D.heading }}>{a.label}</div>
-                <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted, marginTop: 2 }}>{a.desc}</div>
-              </div>
+              <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 700, color: D.heading }}>{a.label}</div>
+              <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted }}>{a.desc}</div>
             </button>
           ))}
         </div>
