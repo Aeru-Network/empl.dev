@@ -144,7 +144,7 @@ const Home: React.FC<HomeProps> = ({ profile, onNavigate }) => {
           style={{
             width: '100%', padding: '8px', borderRadius: 8,
             border: isFollowed ? `1px solid ${D.border}` : '1px solid rgba(255,255,255,0.25)',
-            background: isFollowed ? 'transparent' : '#000',
+            background: isFollowed ? 'transparent' : D.card,
             color: isFollowed ? D.body : '#fff',
             fontSize: tokens.fontSizes.xs, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
             transition: 'all 0.15s',
@@ -300,7 +300,7 @@ const Home: React.FC<HomeProps> = ({ profile, onNavigate }) => {
                 style={{
                   padding: '5px 12px', borderRadius: 7, flexShrink: 0,
                   border: isFollowed ? `1px solid ${D.border}` : '1px solid rgba(255,255,255,0.25)',
-                  background: isFollowed ? 'transparent' : '#000',
+                  background: isFollowed ? 'transparent' : D.card,
                   color: isFollowed ? D.muted : '#fff',
                   fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                   transition: 'all 0.15s',
