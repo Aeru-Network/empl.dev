@@ -82,7 +82,17 @@ export interface ExploreProfile {
 
 export const sampleJobs: Job[] = [];
 
-export const exploreProfiles: ExploreProfile[] = [];
+export const exploreProfiles: ExploreProfile[] = [
+  {
+    id: 'user-gaedog',
+    name: '이개똥',
+    headline: 'Frontend Developer',
+    avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=%EC%9D%B4%EA%B0%9C%EB%98%A5&backgroundColor=1a56db',
+    location: '서울',
+    skills: ['React', 'TypeScript', 'Node.js'],
+    followers: 142,
+  },
+];
 
 /* ─────────────────────────────────────────────
    Follow connections

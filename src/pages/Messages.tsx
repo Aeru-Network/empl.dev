@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { tokens } from '../tokens';
 import { SendIcon, ArrowLeftIcon, PencilIcon, CloseIcon } from '../components/Icons';
+import { exploreProfiles, type ExploreProfile } from '../data/defaultData';
 
 const D = {
   bg: '#000', sidebar: '#0a0a0a', card: '#0f0f0f',
@@ -49,8 +50,9 @@ const Messages: React.FC = () => {
   const [input, setInput] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 700);
   const [showNewMsg, setShowNewMsg] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newHeadline, setNewHeadline] = useState('');
+  const [recipientQuery, setRecipientQuery] = useState('');
+  const [selectedUser, setSelectedUser] = useState<ExploreProfile | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [newFirstMsg, setNewFirstMsg] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
   const sendLock = useRef(false);
@@ -73,7 +75,12 @@ const Messages: React.FC = () => {
   }, [active?.messages.length]);
 
   useEffect(() => {
-    if (showNewMsg) setTimeout(() => nameInputRef.current?.focus(), 50);
+    if (showNewMsg) {
+      setSelectedUser(null);
+      setRecipientQuery('');
+      setShowSuggestions(false);
+      setTimeout(() => nameInputRef.current?.focus(), 50);
+    }
   }, [showNewMsg]);
 
   const openConversation = (id: string) => {
@@ -98,21 +105,56 @@ const Messages: React.FC = () => {
     sendLock.current = false;
   };
 
+  const suggestions = recipientQuery.trim().length > 0
+    ? exploreProfiles.filter(u =>
+        u.name.includes(recipientQuery.trim()) ||
+        u.headline.toLowerCase().includes(recipientQuery.trim().toLowerCase())
+      ).slice(0, 6)
+    : [];
+
+  const closeNewMsg = () => {
+    setShowNewMsg(false);
+    setRecipientQuery('');
+    setSelectedUser(null);
+    setShowSuggestions(false);
+    setNewFirstMsg('');
+  };
+
+  const selectUser = (user: ExploreProfile) => {
+    setSelectedUser(user);
+    setRecipientQuery('');
+    setShowSuggestions(false);
+  };
+
   const startNewConversation = () => {
-    const name = newName.trim();
+    if (!selectedUser) return;
     const firstText = newFirstMsg.trim();
-    if (!name) return;
     const now = new Date();
     const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const cid = 'conv-' + Date.now();
+    // If conversation with this user already exists, open it
+    const existing = conversations.find(c => c.id === `conv-${selectedUser.id}`);
+    if (existing) {
+      if (firstText) {
+        const newMsg: Message = { id: 'm' + Date.now(), text: firstText, from: 'me', time };
+        setConversations(prev => prev.map(c =>
+          c.id === existing.id
+            ? { ...c, messages: [...c.messages, newMsg], lastMessage: firstText, timestamp: '방금', unread: 0 }
+            : c
+        ));
+      }
+      setActiveId(existing.id);
+      closeNewMsg();
+      return;
+    }
+    const cid = `conv-${selectedUser.id}`;
     const messages: Message[] = firstText
       ? [{ id: 'm' + Date.now(), text: firstText, from: 'me', time }]
       : [];
     const newConv: Conversation = {
       id: cid,
-      name,
-      headline: newHeadline.trim() || '',
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=1a56db`,
+      name: selectedUser.name,
+      headline: selectedUser.headline,
+      avatar: selectedUser.avatar,
       lastMessage: firstText || '',
       timestamp: firstText ? '방금' : '',
       unread: 0,
@@ -121,10 +163,7 @@ const Messages: React.FC = () => {
     };
     setConversations(prev => [newConv, ...prev]);
     setActiveId(cid);
-    setShowNewMsg(false);
-    setNewName('');
-    setNewHeadline('');
-    setNewFirstMsg('');
+    closeNewMsg();
   };
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -133,7 +172,8 @@ const Messages: React.FC = () => {
 
   const handleNewMsgKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) startNewConversation();
-    if (e.key === 'Escape') setShowNewMsg(false);
+    if (e.key === 'Escape') closeNewMsg();
+    if (e.key === 'ArrowDown' && suggestions.length > 0) setShowSuggestions(true);
   };
 
   /* ── New Message Modal ── */
@@ -144,7 +184,7 @@ const Messages: React.FC = () => {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         zIndex: 1000, padding: 20,
       }}
-      onClick={e => { if (e.target === e.currentTarget) setShowNewMsg(false); }}
+      onClick={e => { if (e.target === e.currentTarget) closeNewMsg(); }}
     >
       <div style={{
         background: '#0f0f0f', border: `1px solid ${D.border}`,
@@ -154,50 +194,95 @@ const Messages: React.FC = () => {
         <style>{`@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }`}</style>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h3 style={{ margin: 0, fontSize: tokens.fontSizes.md, fontWeight: 700, color: D.heading }}>새 메시지</h3>
-          <button onClick={() => setShowNewMsg(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+          <button onClick={closeNewMsg} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
             <CloseIcon size={16} color={D.muted} />
           </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Recipient search */}
           <div>
             <label style={{ fontSize: tokens.fontSizes.xs, color: D.muted, fontWeight: 600, display: 'block', marginBottom: 6 }}>받는 사람 *</label>
-            <input
-              ref={nameInputRef}
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-              onKeyDown={handleNewMsgKey}
-              placeholder="이름을 입력하세요"
-              style={{
-                width: '100%', background: D.input, border: `1px solid rgba(255,255,255,0.1)`,
-                borderRadius: 8, padding: '10px 12px', fontSize: tokens.fontSizes.sm,
-                color: D.heading, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
-              }}
-              onFocus={e => (e.target.style.borderColor = 'rgba(255,255,255,0.25)')}
-              onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
-            />
+            {selectedUser ? (
+              /* Selected user chip */
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '8px 12px', borderRadius: 8,
+                border: '1px solid rgba(0,112,243,0.4)', background: 'rgba(0,112,243,0.08)',
+              }}>
+                <img src={selectedUser.avatar} alt={selectedUser.name} style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading }}>{selectedUser.name}</div>
+                  {selectedUser.headline && <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedUser.headline}</div>}
+                </div>
+                <button
+                  onClick={() => setSelectedUser(null)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                >
+                  <CloseIcon size={13} color={D.muted} />
+                </button>
+              </div>
+            ) : (
+              /* Search input with dropdown */
+              <div style={{ position: 'relative' }}>
+                <input
+                  ref={nameInputRef}
+                  value={recipientQuery}
+                  onChange={e => { setRecipientQuery(e.target.value); setShowSuggestions(true); }}
+                  onKeyDown={handleNewMsgKey}
+                  placeholder="이름으로 검색..."
+                  style={{
+                    width: '100%', background: D.input, border: `1px solid rgba(255,255,255,0.1)`,
+                    borderRadius: 8, padding: '10px 12px', fontSize: tokens.fontSizes.sm,
+                    color: D.heading, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
+                  }}
+                  onFocus={e => { e.target.style.borderColor = 'rgba(255,255,255,0.25)'; setShowSuggestions(true); }}
+                  onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; setTimeout(() => setShowSuggestions(false), 150); }}
+                />
+                {showSuggestions && recipientQuery.trim().length > 0 && (
+                  <div style={{
+                    position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
+                    background: '#161616', border: `1px solid ${D.border}`, borderRadius: 10,
+                    zIndex: 20, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                  }}>
+                    {suggestions.length > 0 ? suggestions.map((u, i) => (
+                      <button
+                        key={u.id}
+                        onMouseDown={() => selectUser(u)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                          padding: '10px 14px', background: 'none', border: 'none',
+                          borderBottom: i < suggestions.length - 1 ? `1px solid ${D.border}` : 'none',
+                          cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                          transition: 'background 0.1s',
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                      >
+                        <img src={u.avatar} alt={u.name} style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0 }} />
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading }}>{u.name}</div>
+                          {u.headline && <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.headline}</div>}
+                        </div>
+                      </button>
+                    )) : (
+                      <div style={{ padding: '14px', fontSize: tokens.fontSizes.sm, color: D.muted, textAlign: 'center' }}>
+                        검색 결과가 없습니다
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-          <div>
-            <label style={{ fontSize: tokens.fontSizes.xs, color: D.muted, fontWeight: 600, display: 'block', marginBottom: 6 }}>직함 (선택)</label>
-            <input
-              value={newHeadline}
-              onChange={e => setNewHeadline(e.target.value)}
-              onKeyDown={handleNewMsgKey}
-              placeholder="예: Frontend Engineer"
-              style={{
-                width: '100%', background: D.input, border: `1px solid rgba(255,255,255,0.1)`,
-                borderRadius: 8, padding: '10px 12px', fontSize: tokens.fontSizes.sm,
-                color: D.heading, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
-              }}
-              onFocus={e => (e.target.style.borderColor = 'rgba(255,255,255,0.25)')}
-              onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
-            />
-          </div>
+
+          {/* First message */}
           <div>
             <label style={{ fontSize: tokens.fontSizes.xs, color: D.muted, fontWeight: 600, display: 'block', marginBottom: 6 }}>첫 메시지 (선택)</label>
             <textarea
               value={newFirstMsg}
               onChange={e => setNewFirstMsg(e.target.value)}
+              onKeyDown={handleNewMsgKey}
               placeholder="안녕하세요!"
               rows={3}
               style={{
@@ -210,14 +295,15 @@ const Messages: React.FC = () => {
               onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
             />
           </div>
+
           <button
             onClick={startNewConversation}
-            disabled={!newName.trim()}
+            disabled={!selectedUser}
             style={{
               width: '100%', padding: '12px', borderRadius: 9, border: 'none',
-              background: newName.trim() ? D.accent : 'rgba(255,255,255,0.06)',
-              color: newName.trim() ? '#fff' : D.muted,
-              fontSize: tokens.fontSizes.sm, fontWeight: 700, cursor: newName.trim() ? 'pointer' : 'default',
+              background: selectedUser ? D.accent : 'rgba(255,255,255,0.06)',
+              color: selectedUser ? '#fff' : D.muted,
+              fontSize: tokens.fontSizes.sm, fontWeight: 700, cursor: selectedUser ? 'pointer' : 'default',
               fontFamily: 'inherit', transition: 'all 0.15s',
             }}
           >
