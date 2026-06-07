@@ -65,10 +65,6 @@ const MyPage: React.FC<MyPageProps> = ({ profile, companies, onNavigate, onIniti
 
   const quickActions = [
     { label: '내 프로필', desc: '프로필 보기 및 편집', onClick: () => onNavigate('profile') },
-    { label: '개발자 탐색', desc: '다른 개발자 찾기', onClick: () => onNavigate('explore') },
-    { label: '채용 둘러보기', desc: '맞춤 포지션 탐색', onClick: () => onNavigate('jobs') },
-    { label: '메시지', desc: '받은 메시지 확인', onClick: () => onNavigate('messages') },
-    { label: '회사 관리', desc: '기업 페이지 관리', onClick: onManageCompanies },
     { label: '설정', desc: '계정 및 프로필 설정', onClick: () => onNavigate('settings') },
   ];
 
