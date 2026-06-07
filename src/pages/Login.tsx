@@ -30,7 +30,7 @@ const Login: React.FC<LoginProps> = ({ onNavigate, onLogin }) => {
       {/* Wordmark */}
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
         <span style={{ fontWeight: 800, fontSize: 26, color: '#ffffff', letterSpacing: '-1px' }}>
-          empl<span style={{ color: '#a1a1aa', fontWeight: 700 }}>.dev</span>
+          empl<span style={{ color: '#3D7BFF', fontWeight: 700 }}>.dev</span>
         </span>
       </div>
 

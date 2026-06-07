@@ -96,13 +96,66 @@ const Nav: React.FC<NavProps> = ({ currentPage, onNavigate, isLoggedIn = true, p
 
     return (
       <>
-        {/* Minimal top bar: logo only */}
+        {/* Minimal top bar: logo + user */}
         <div style={{
           height: DESKTOP_NAV_H, background: '#000',
           borderBottom: `1px solid ${D.border}`,
-          display: 'flex', alignItems: 'center', padding: '0 20px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px',
         }}>
           <Logo onClick={() => onNavigate('landing')} />
+          <div ref={dropdownRef} style={{ position: 'relative' }}>
+            {isLoggedIn ? (
+              <>
+                <button
+                  onClick={() => setDropdownOpen(o => !o)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 5, background: 'none',
+                    border: `1px solid ${D.border}`, borderRadius: 999,
+                    padding: '3px 8px 3px 3px', cursor: 'pointer',
+                  }}
+                >
+                  <Avatar profile={profile} size={26} />
+                  <ChevronDownIcon size={12} color={D.body} />
+                </button>
+                {dropdownOpen && (
+                  <div style={{
+                    position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                    background: D.dropdownBg, border: `1px solid ${D.dropdownBorder}`,
+                    borderRadius: 10, boxShadow: '0 16px 48px rgba(0,0,0,0.6)',
+                    minWidth: 170, overflow: 'hidden', zIndex: tokens.zIndex.dropdown,
+                  }}>
+                    <div style={{ padding: '10px 14px 8px', borderBottom: `1px solid ${D.dropdownDivider}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Avatar profile={profile} size={30} />
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile?.name?.trim() || '게스트'}</div>
+                      </div>
+                    </div>
+                    <div style={{ borderTop: `1px solid ${D.dropdownDivider}` }}>
+                      <button
+                        onClick={() => { setDropdownOpen(false); onLogout?.(); }}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 9, width: '100%',
+                          background: 'none', border: 'none', padding: '10px 14px', cursor: 'pointer',
+                          fontSize: tokens.fontSizes.sm, color: '#f87171', textAlign: 'left', fontFamily: 'inherit',
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.08)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                      >
+                        <LogOutIcon size={15} color="#f87171" /> 로그아웃
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <button
+                onClick={() => onNavigate('login')}
+                style={{ background: '#fff', color: '#000', border: 'none', borderRadius: 7, padding: '6px 14px', fontSize: tokens.fontSizes.sm, fontWeight: 700, cursor: 'pointer' }}
+              >
+                로그인
+              </button>
+            )}
+          </div>
         </div>
         {/* Fixed bottom bar */}
         <nav style={{
