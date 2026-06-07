@@ -32,8 +32,19 @@ interface Conversation {
   lastReadMsgId: string | null;
 }
 
+const MESSAGES_KEY = 'empl.messages';
+
+function loadConversations(): Conversation[] {
+  try {
+    const raw = localStorage.getItem(MESSAGES_KEY);
+    return raw ? (JSON.parse(raw) as Conversation[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 const Messages: React.FC = () => {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>(loadConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 700);
@@ -46,6 +57,10 @@ const Messages: React.FC = () => {
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   const active = conversations.find(c => c.id === activeId) ?? null;
+
+  useEffect(() => {
+    localStorage.setItem(MESSAGES_KEY, JSON.stringify(conversations));
+  }, [conversations]);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 700);
@@ -81,11 +96,6 @@ const Messages: React.FC = () => {
     ));
     setInput('');
     sendLock.current = false;
-    setTimeout(() => {
-      setConversations(prev => prev.map(c =>
-        c.id === cid ? { ...c, lastReadMsgId: newMsg.id } : c
-      ));
-    }, 1500);
   };
 
   const startNewConversation = () => {
@@ -107,7 +117,7 @@ const Messages: React.FC = () => {
       timestamp: firstText ? '방금' : '',
       unread: 0,
       messages,
-      lastReadMsgId: messages.length ? messages[0].id : null,
+      lastReadMsgId: null,
     };
     setConversations(prev => [newConv, ...prev]);
     setActiveId(cid);

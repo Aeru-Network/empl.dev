@@ -99,7 +99,7 @@ const Nav: React.FC<NavProps> = ({ currentPage, onNavigate, isLoggedIn = true, p
     { label: '탐색', page: 'explore' },
     { label: '채용공고', page: 'jobs' },
     { label: '회사', page: 'companies' },
-    { label: '메시지', page: 'messages', icon: <MessageIcon size={14} color="currentColor" /> },
+    ...(isLoggedIn ? [{ label: '메시지', page: 'messages' as Page, icon: <MessageIcon size={14} color="currentColor" /> }] : []),
   ];
 
   const dropdownItems: { label: string; page: Page; icon: React.ReactNode }[] = [
