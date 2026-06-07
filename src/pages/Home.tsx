@@ -328,26 +328,21 @@ const Home: React.FC<HomeProps> = ({ profile, onNavigate }) => {
         {/* ── Main column ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-          {/* Greeting banner */}
-          <div style={{
-            background: `linear-gradient(135deg, #0a0f1e 0%, #0d1730 50%, #0a0a14 100%)`,
-            border: `1px solid rgba(61,123,255,0.2)`,
-            borderRadius: 16, padding: isMobile ? '20px' : '24px 28px',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{ position: 'absolute', top: -30, right: -30, width: 160, height: 160, borderRadius: '50%', background: 'rgba(61,123,255,0.06)', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 10, right: 40, width: 80, height: 80, borderRadius: '50%', background: 'rgba(99,102,241,0.08)', pointerEvents: 'none' }} />
-            <div style={{ position: 'relative' }}>
-              <p style={{ fontSize: tokens.fontSizes.xs, color: 'rgba(61,123,255,0.8)', fontWeight: 600, margin: '0 0 6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                {new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
-              </p>
-              <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: D.heading, margin: '0 0 6px', letterSpacing: '-0.5px' }}>
-                {greeting}, {firstName}님 👋
+          {/* Greeting */}
+          <div style={{ padding: '4px 0 8px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 4 }}>
+              <h1 style={{ fontSize: isMobile ? 20 : 22, fontWeight: 700, color: D.heading, margin: 0, letterSpacing: '-0.4px' }}>
+                {greeting}, {firstName}님
               </h1>
-              <p style={{ fontSize: tokens.fontSizes.sm, color: D.body, margin: 0, lineHeight: 1.6 }}>
-                {profile?.headline || '오늘도 멋진 코드를 작성해 보세요!'}
-              </p>
+              <span style={{ fontSize: tokens.fontSizes.xs, color: D.muted, flexShrink: 0 }}>
+                {new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
+              </span>
             </div>
+            {profile?.headline && (
+              <p style={{ fontSize: tokens.fontSizes.sm, color: D.muted, margin: 0 }}>
+                {profile.headline}
+              </p>
+            )}
           </div>
 
           {/* ── Dev recommendations (horizontal scroll on mobile, grid on desktop) ── */}
