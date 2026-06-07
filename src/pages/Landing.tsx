@@ -184,7 +184,7 @@ const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
         </button>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(20px, 6vw, 72px)', alignItems: 'center' }}>
-        {[['12,000+', '개발자'], ['850+', '채용 공고'], ['3,200+', '오픈소스']].map(([val, label], i, arr) => (
+        {[['?', '개발자'], ['?', '채용 공고'], ['?', '오픈소스']].map(([val, label], i, arr) => (
           <React.Fragment key={label}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 'clamp(18px, 3.5vw, 30px)', fontWeight: 800, color: D.heading, lineHeight: 1, letterSpacing: '-1px' }}>{val}</div>
