@@ -3,6 +3,7 @@ import { tokens } from '../tokens';
 import { type ProfileData } from '../data/defaultData';
 import { HeartIcon, EyeIcon, ClockIcon, ArrowLeftIcon, SendIcon, PencilIcon, TrashIcon } from '../components/Icons';
 import MarkdownRenderer from '../components/MarkdownRenderer';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 
 interface PostDetailProps {
   postId: string;
@@ -34,7 +35,7 @@ const D = {
 const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack, onEdit, onDelete }) => {
   const post = profile?.posts.find(p => p.id === postId) ?? null;
   const [liked, setLiked] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState('');
   const sendLock = React.useRef(false);
@@ -79,6 +80,14 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack, onEdit
 
   return (
     <div style={{ background: D.bg, minHeight: '100vh' }}>
+      {showDeleteModal && onDelete && (
+        <ConfirmDeleteModal
+          title="포스트 삭제"
+          description="삭제된 포스트는 복구할 수 없습니다. 정말 삭제하시겠어요?"
+          onConfirm={() => { setShowDeleteModal(false); onDelete(); }}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '28px 24px 100px' }}>
 
         {/* Back + actions */}
@@ -113,9 +122,9 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack, onEdit
                   <PencilIcon size={13} color="currentColor" /> 수정
                 </button>
               )}
-              {onDelete && !confirmDelete && (
+              {onDelete && (
                 <button
-                  onClick={() => setConfirmDelete(true)}
+                  onClick={() => setShowDeleteModal(true)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 6,
                     padding: '7px 13px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
@@ -128,26 +137,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ postId, profile, onBack, onEdit
                 >
                   <TrashIcon size={13} color="currentColor" /> 삭제
                 </button>
-              )}
-              {onDelete && confirmDelete && (
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <button
-                    onClick={() => setConfirmDelete(false)}
-                    style={{
-                      padding: '7px 12px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
-                      border: `1px solid ${D.border}`, background: 'transparent',
-                      color: D.muted, fontSize: tokens.fontSizes.xs, fontWeight: 500,
-                    }}
-                  >취소</button>
-                  <button
-                    onClick={onDelete}
-                    style={{
-                      padding: '7px 12px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
-                      border: 'none', background: '#ef4444',
-                      color: '#fff', fontSize: tokens.fontSizes.xs, fontWeight: 600,
-                    }}
-                  >삭제 확인</button>
-                </div>
               )}
             </div>
           )}

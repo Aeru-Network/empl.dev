@@ -129,9 +129,13 @@ const MyPage: React.FC<MyPageProps> = ({ profile, companies, onNavigate, onIniti
                   onMouseEnter={e => (e.currentTarget.style.borderColor = D.borderHover)}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = D.border)}
                 >
-                  <div style={{ width: 38, height: 38, borderRadius: 8, background: c.logoGradient, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, flexShrink: 0 }}>
-                    {c.name[0]}
-                  </div>
+                  {c.logoImage ? (
+                    <img src={c.logoImage} alt={c.name} style={{ width: 38, height: 38, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
+                  ) : (
+                    <div style={{ width: 38, height: 38, borderRadius: 8, background: c.logoGradient, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, flexShrink: 0, fontSize: 18 }}>
+                      {[...c.name][0] ?? '?'}
+                    </div>
+                  )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: tokens.fontSizes.sm, fontWeight: 600, color: D.heading }}>{c.name}</div>
                     <div style={{ fontSize: tokens.fontSizes.xs, color: D.muted, marginTop: 2 }}>{c.openings.length}개 채용중 · {c.followers.toLocaleString()} 팔로워</div>

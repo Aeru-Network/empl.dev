@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { tokens } from '../tokens';
 import { createEmptyCompany, type Company, type CompanyOpening } from '../data/defaultData';
 import { ArrowLeftIcon, PlusIcon, TrashIcon, CheckIcon } from '../components/Icons';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 
 const fileToDataUrl = (file: File): Promise<string> =>
   new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target!.result as string); r.readAsDataURL(file); });
@@ -68,6 +69,7 @@ const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete
   const [logoImage, setLogoImage] = useState<string | undefined>(base.logoImage);
   const [coverImage, setCoverImage] = useState<string | undefined>(base.coverImage);
   const [openings, setOpenings] = useState<CompanyOpening[]>(base.openings);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const logoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -109,6 +111,14 @@ const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete
 
   return (
     <div style={{ background: D.bg, minHeight: '100vh', padding: '20px 20px 80px' }}>
+      {showDeleteModal && (
+        <ConfirmDeleteModal
+          title="회사 페이지 삭제"
+          description="삭제된 회사 페이지는 복구할 수 없습니다. 모든 채용 공고와 정보가 영구적으로 삭제됩니다."
+          onConfirm={() => { setShowDeleteModal(false); onDelete(base.id); }}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
       <div style={{ maxWidth: 600, margin: '0 auto' }}>
         <button
           onClick={onCancel}
@@ -272,7 +282,7 @@ const CompanyManage: React.FC<CompanyManageProps> = ({ company, onSave, onDelete
           </button>
           {!isNew && (
             <button
-              onClick={() => onDelete(base.id)}
+              onClick={() => setShowDeleteModal(true)}
               style={{
                 padding: '13px 18px', borderRadius: 9,
                 border: `1px solid rgba(239,68,68,0.3)`, background: D.errorDim, color: D.error,
