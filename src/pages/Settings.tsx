@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { tokens } from '../tokens';
 import type { ProfileData, Experience, Project, Post } from '../data/defaultData';
 import { SparklesIcon, PlusIcon, CloseIcon, CheckIcon, TrashIcon, PencilIcon } from '../components/Icons';
+import LocationInput from '../components/LocationInput';
 
 interface SettingsProps {
   profile: ProfileData | null;
@@ -176,7 +177,7 @@ const Settings: React.FC<SettingsProps> = ({ profile, onSave, onReset, onInitial
                 <Field label="경력(년)"><input style={inputBase} value={years} onChange={e => setYears(e.target.value.replace(/[^0-9]/g, ''))} inputMode="numeric" onFocus={focus} onBlur={blur} /></Field>
               </div>
             </div>
-            <Field label="위치"><input style={inputBase} value={location} onChange={e => setLocation(e.target.value)} onFocus={focus} onBlur={blur} /></Field>
+            <Field label="위치"><LocationInput value={location} onChange={setLocation} style={inputBase} onFocus={focus} onBlur={blur} /></Field>
             <Field label="소개글"><textarea style={{ ...inputBase, resize: 'vertical', lineHeight: 1.6, minHeight: 90 }} value={bio} onChange={e => setBio(e.target.value)} rows={4} onFocus={focus} onBlur={blur} /></Field>
             <Field label="스킬">
               <div style={{ display: 'flex', gap: 8 }}>
@@ -319,8 +320,14 @@ const ExperienceEditor: React.FC<{ experiences: Experience[]; onChange: (exps: E
   );
 };
 
-const YEARS = Array.from({ length: new Date().getFullYear() - 1979 }, (_, i) => String(new Date().getFullYear() - i));
+const NOW = new Date();
+const CUR_YEAR = NOW.getFullYear();
+const CUR_MONTH = NOW.getMonth() + 1;
+const YEARS = Array.from({ length: CUR_YEAR - 1979 }, (_, i) => String(CUR_YEAR - i));
 const MONTHS = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+
+const availableMonths = (year: string) =>
+  MONTHS.filter(m => !year || String(year) !== String(CUR_YEAR) || Number(m) <= CUR_MONTH);
 
 function parsePeriod(period: string) {
   const parts = period.split(/\s*[–\-]\s*/);
@@ -391,13 +398,17 @@ const ExpForm: React.FC<{
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             <span style={{ fontSize: tokens.fontSizes.xs, color: D.muted, width: 28, flexShrink: 0 }}>시작</span>
-            <select value={sy} onChange={e => { setSy(e.target.value); updatePeriod(e.target.value, sm, isCurrent, ey, em); }} style={selectStyle} onFocus={focusSel} onBlur={blurSel}>
+            <select value={sy} onChange={e => {
+              const ny = e.target.value;
+              const clampedSm = ny === String(CUR_YEAR) && Number(sm) > CUR_MONTH ? '' : sm;
+              setSy(ny); setSm(clampedSm); updatePeriod(ny, clampedSm, isCurrent, ey, em);
+            }} style={selectStyle} onFocus={focusSel} onBlur={blurSel}>
               <option value="">연도</option>
               {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
             <select value={sm} onChange={e => { setSm(e.target.value); updatePeriod(sy, e.target.value, isCurrent, ey, em); }} style={selectStyle} onFocus={focusSel} onBlur={blurSel}>
               <option value="">월</option>
-              {MONTHS.map(m => <option key={m} value={m}>{m}월</option>)}
+              {availableMonths(sy).map(m => <option key={m} value={m}>{m}월</option>)}
             </select>
           </div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -408,13 +419,17 @@ const ExpForm: React.FC<{
               </div>
             ) : (
               <>
-                <select value={ey} onChange={e => { setEy(e.target.value); updatePeriod(sy, sm, isCurrent, e.target.value, em); }} style={selectStyle} onFocus={focusSel} onBlur={blurSel}>
+                <select value={ey} onChange={e => {
+                  const ny = e.target.value;
+                  const clampedEm = ny === String(CUR_YEAR) && Number(em) > CUR_MONTH ? '' : em;
+                  setEy(ny); setEm(clampedEm); updatePeriod(sy, sm, isCurrent, ny, clampedEm);
+                }} style={selectStyle} onFocus={focusSel} onBlur={blurSel}>
                   <option value="">연도</option>
                   {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
                 <select value={em} onChange={e => { setEm(e.target.value); updatePeriod(sy, sm, isCurrent, ey, e.target.value); }} style={selectStyle} onFocus={focusSel} onBlur={blurSel}>
                   <option value="">월</option>
-                  {MONTHS.map(m => <option key={m} value={m}>{m}월</option>)}
+                  {availableMonths(ey).map(m => <option key={m} value={m}>{m}월</option>)}
                 </select>
               </>
             )}

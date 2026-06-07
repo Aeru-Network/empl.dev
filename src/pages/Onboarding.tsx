@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { tokens } from '../tokens';
 import { createEmptyProfile, type ProfileData, type SocialLink } from '../data/defaultData';
 import { SparklesIcon, PlusIcon, CloseIcon, GithubIcon, EmailIcon, WebsiteIcon } from '../components/Icons';
+import LocationInput from '../components/LocationInput';
 
 interface OnboardingProps {
   onComplete: (profile: ProfileData) => void;
@@ -221,7 +222,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onLoadSample, onCan
             </div>
             <div>
               <label style={labelStyle}>위치</label>
-              <input style={inputStyle} value={location} onChange={e => setLocation(e.target.value)} placeholder="예: 서울, 대한민국" onFocus={focusStyle} onBlur={blurStyle} />
+              <LocationInput value={location} onChange={setLocation} style={inputStyle} onFocus={focusStyle} onBlur={blurStyle} />
             </div>
             <div>
               <label style={labelStyle}>소개글</label>
