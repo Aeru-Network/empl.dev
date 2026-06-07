@@ -96,8 +96,14 @@ const Nav: React.FC<NavProps> = ({ currentPage, onNavigate, isLoggedIn = true, p
 
     return (
       <>
-        {/* 0-height spacer so App layout doesn't shift */}
-        <div style={{ height: 0 }} />
+        {/* Minimal top bar: logo only */}
+        <div style={{
+          height: DESKTOP_NAV_H, background: '#000',
+          borderBottom: `1px solid ${D.border}`,
+          display: 'flex', alignItems: 'center', padding: '0 20px',
+        }}>
+          <Logo onClick={() => onNavigate('landing')} />
+        </div>
         {/* Fixed bottom bar */}
         <nav style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000,
