@@ -551,7 +551,7 @@ const Messages: React.FC = () => {
                       }}
                       style={{
                         width: '100%', boxSizing: 'border-box',
-                        background: '#111b33', border: '1px solid rgba(0,112,243,0.5)',
+                        background: '#111', border: '1px solid rgba(255,255,255,0.2)',
                         borderRadius: '14px 14px 4px 14px',
                         padding: '10px 14px', color: '#fff',
                         fontSize: tokens.fontSizes.sm, lineHeight: 1.55, fontFamily: 'inherit',
