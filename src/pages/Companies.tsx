@@ -46,20 +46,8 @@ const Companies: React.FC<CompaniesProps> = ({ companies, onOpen, onCreate, onMa
   return (
     <div style={{ background: D.bg, minHeight: '100vh' }}>
       {/* Header */}
-      <div style={{
-        borderBottom: `1px solid ${D.border}`,
-        padding: 'clamp(48px, 7vw, 80px) 20px clamp(48px, 7vw, 80px)',
-        position: 'relative', overflow: 'hidden', textAlign: 'center',
-      }}>
-        <div style={{ position: 'absolute', top: '-30%', left: '50%', transform: 'translateX(-50%)', width: 500, height: 300, background: 'radial-gradient(ellipse, rgba(0,112,243,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 640, margin: '0 auto' }}>
-          <h1 style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontWeight: 800, color: D.heading, margin: '0 0 12px', letterSpacing: '-2px' }}>
-            회사
-          </h1>
-          <p style={{ fontSize: tokens.fontSizes.md, color: D.body, margin: 0, lineHeight: 1.6 }}>
-            기업 페이지를 탐색하고, 내 회사 페이지를 직접 관리하세요
-          </p>
-        </div>
+      <div style={{ borderBottom: `1px solid ${D.border}`, padding: '20px 20px 14px' }}>
+        <h1 style={{ fontSize: tokens.fontSizes.lg, fontWeight: 800, color: D.heading, margin: 0, letterSpacing: '-0.4px' }}>회사</h1>
       </div>
 
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 20px 80px' }}>
