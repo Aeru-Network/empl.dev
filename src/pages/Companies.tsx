@@ -45,21 +45,20 @@ const Companies: React.FC<CompaniesProps> = ({ companies, onOpen, onCreate, onMa
 
   return (
     <div style={{ background: D.bg, minHeight: '100vh' }}>
-      {/* Header */}
-      <div style={{ borderBottom: `1px solid ${D.border}`, padding: '20px 20px 14px' }}>
-        <h1 style={{ fontSize: tokens.fontSizes.lg, fontWeight: 800, color: D.heading, margin: 0, letterSpacing: '-0.4px' }}>회사</h1>
-      </div>
-
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 20px 80px' }}>
-        {/* My managed pages */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-          <h2 style={{ fontSize: tokens.fontSizes.lg, fontWeight: 700, color: D.heading, margin: 0, letterSpacing: '-0.3px' }}>
-            내가 관리하는 페이지
-          </h2>
+      {/* Hero Header */}
+      <div style={{ borderBottom: `1px solid ${D.border}`, padding: 'clamp(40px, 6vw, 72px) 20px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)', width: 500, height: 260, background: 'radial-gradient(ellipse, rgba(0,112,243,0.09) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <h1 style={{ fontSize: 'clamp(26px, 5vw, 46px)', fontWeight: 800, color: D.heading, margin: '0 0 10px', letterSpacing: '-1.5px' }}>
+            회사
+          </h1>
+          <p style={{ fontSize: tokens.fontSizes.sm, color: D.body, margin: '0 0 24px' }}>
+            기업을 탐색하고 채용 소식을 확인하세요
+          </p>
           <button
             onClick={onCreate}
             style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8,
+              display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 20px', borderRadius: 9,
               border: `1px solid ${D.border}`, background: D.card, color: D.heading,
               fontSize: tokens.fontSizes.sm, fontWeight: 600, cursor: 'pointer',
               transition: `border-color ${tokens.transitions.fast}`,
@@ -68,8 +67,17 @@ const Companies: React.FC<CompaniesProps> = ({ companies, onOpen, onCreate, onMa
             onMouseLeave={e => (e.currentTarget.style.borderColor = D.border)}
           >
             <PlusIcon size={14} color={D.heading} />
-            새 페이지
+            새 회사 페이지
           </button>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 20px 80px' }}>
+        {/* My managed pages */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+          <h2 style={{ fontSize: tokens.fontSizes.md, fontWeight: 700, color: D.heading, margin: 0, letterSpacing: '-0.3px' }}>
+            내가 관리하는 페이지
+          </h2>
         </div>
 
         {managed.length > 0 ? (
