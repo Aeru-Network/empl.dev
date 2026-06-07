@@ -143,9 +143,9 @@ const Home: React.FC<HomeProps> = ({ profile, onNavigate }) => {
           onClick={() => toggleFollow(dev.id)}
           style={{
             width: '100%', padding: '8px', borderRadius: 8,
-            border: isFollowed ? `1px solid ${D.border}` : `1px solid ${D.accent}`,
-            background: isFollowed ? 'transparent' : D.accentDim,
-            color: isFollowed ? D.body : D.accent,
+            border: isFollowed ? `1px solid ${D.border}` : '1px solid rgba(255,255,255,0.25)',
+            background: isFollowed ? 'transparent' : '#000',
+            color: isFollowed ? D.body : '#fff',
             fontSize: tokens.fontSizes.xs, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
             transition: 'all 0.15s',
           }}
@@ -299,9 +299,9 @@ const Home: React.FC<HomeProps> = ({ profile, onNavigate }) => {
                 onClick={() => toggleFollow(dev.id)}
                 style={{
                   padding: '5px 12px', borderRadius: 7, flexShrink: 0,
-                  border: isFollowed ? `1px solid ${D.border}` : `1px solid ${D.accent}`,
-                  background: isFollowed ? 'transparent' : D.accentDim,
-                  color: isFollowed ? D.muted : D.accent,
+                  border: isFollowed ? `1px solid ${D.border}` : '1px solid rgba(255,255,255,0.25)',
+                  background: isFollowed ? 'transparent' : '#000',
+                  color: isFollowed ? D.muted : '#fff',
                   fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                   transition: 'all 0.15s',
                 }}
