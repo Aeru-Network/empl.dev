@@ -607,7 +607,7 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
 );
 
 const NotifRow: React.FC<{ label: string; desc: string }> = ({ label, desc }) => {
-  const [on, setOn] = useState(true);
+  const [on, setOn] = useState(false);
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid rgba(255,255,255,0.05)` }}>
       <div>
