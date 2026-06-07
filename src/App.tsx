@@ -14,6 +14,7 @@ import Companies from './pages/Companies';
 import CompanyView from './pages/CompanyView';
 import CompanyManage from './pages/CompanyManage';
 import Messages from './pages/Messages';
+import Home from './pages/Home';
 import {
   type ProfileData,
   type Company,
@@ -21,6 +22,7 @@ import {
 
 export type Page =
   | 'landing'
+  | 'home'
   | 'profile'
   | 'explore'
   | 'jobs'
@@ -36,7 +38,7 @@ export type Page =
   | 'companyManage';
 
 const PAGES_WITH_NAV: Page[] = [
-  'landing', 'profile', 'explore', 'jobs', 'mypage', 'messages',
+  'landing', 'home', 'profile', 'explore', 'jobs', 'mypage', 'messages',
   'postDetail', 'postEditor', 'settings', 'companies', 'company', 'companyManage',
 ];
 
@@ -129,7 +131,7 @@ const App: React.FC = () => {
 
   const handleLogin = () => {
     setLoggedIn(true);
-    navigate(profile ? 'profile' : 'onboarding');
+    navigate(profile ? 'home' : 'onboarding');
   };
 
   const handleLogout = () => {
@@ -141,7 +143,7 @@ const App: React.FC = () => {
   const completeOnboarding = (p: ProfileData) => {
     setProfile(p);
     setLoggedIn(true);
-    navigate('profile');
+    navigate('home');
   };
 
   const loadSampleProfile = () => {
@@ -202,6 +204,7 @@ const App: React.FC = () => {
       )}
 
       {page === 'landing' && <Landing onNavigate={navigate} />}
+      {page === 'home' && <Home profile={profile} onNavigate={navigate} />}
 
       {page === 'profile' && (
         <Profile

@@ -4,7 +4,7 @@ import { ChevronDownIcon, UserIcon, SettingsIcon, LogOutIcon, HomeIcon, Briefcas
 import type { ProfileData } from '../data/defaultData';
 
 type Page =
-  | 'landing' | 'profile' | 'explore' | 'jobs' | 'login' | 'mypage'
+  | 'landing' | 'home' | 'profile' | 'explore' | 'jobs' | 'login' | 'mypage'
   | 'postDetail' | 'postEditor' | 'settings' | 'onboarding' | 'companies' | 'company' | 'companyManage'
   | 'messages';
 
@@ -35,7 +35,7 @@ const D = {
 export const MOBILE_NAV_H = 60;
 export const DESKTOP_NAV_H = 56;
 
-const Logo: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+const Logo: React.FC<{ onClick: () => void; isLoggedIn?: boolean }> = ({ onClick }) => (
   <button onClick={onClick} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
     <span style={{ fontWeight: 800, fontSize: tokens.fontSizes.md, color: '#ffffff', letterSpacing: '-0.5px' }}>
       empl<span style={{ color: '#3D7BFF' }}>.dev</span>
@@ -86,6 +86,7 @@ const Nav: React.FC<NavProps> = ({ currentPage, onNavigate, isLoggedIn = true, p
   if (isMobile) {
     type Tab = { label: string; page: Page; icon: (active: boolean) => React.ReactNode };
     const tabs: Tab[] = [
+      ...(isLoggedIn ? [{ label: '홈', page: 'home' as Page, icon: (a: boolean) => <HomeIcon size={22} color={a ? '#fff' : '#52525b'} /> }] : []),
       { label: '탐색', page: 'explore', icon: (a) => <SearchIcon size={22} color={a ? '#fff' : '#52525b'} /> },
       { label: '채용', page: 'jobs', icon: (a) => <BriefcaseIcon size={22} color={a ? '#fff' : '#52525b'} /> },
       { label: '회사', page: 'companies', icon: (a) => <BuildingIcon size={22} color={a ? '#fff' : '#52525b'} /> },
@@ -102,7 +103,7 @@ const Nav: React.FC<NavProps> = ({ currentPage, onNavigate, isLoggedIn = true, p
           borderBottom: `1px solid ${D.border}`,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px',
         }}>
-          <Logo onClick={() => onNavigate('landing')} />
+          <Logo onClick={() => onNavigate(isLoggedIn ? 'home' : 'landing')} />
           <div ref={dropdownRef} style={{ position: 'relative' }}>
             {isLoggedIn ? (
               <>
@@ -231,6 +232,7 @@ const Nav: React.FC<NavProps> = ({ currentPage, onNavigate, isLoggedIn = true, p
   });
 
   const centerLinks: { label: string; page: Page; icon?: React.ReactNode }[] = [
+    ...(isLoggedIn ? [{ label: '홈', page: 'home' as Page }] : []),
     { label: '탐색', page: 'explore' },
     { label: '채용공고', page: 'jobs' },
     { label: '회사', page: 'companies' },
@@ -258,7 +260,7 @@ const Nav: React.FC<NavProps> = ({ currentPage, onNavigate, isLoggedIn = true, p
         maxWidth: 1100, margin: '0 auto', width: '100%', padding: '0 20px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <Logo onClick={() => onNavigate('landing')} />
+        <Logo onClick={() => onNavigate(isLoggedIn ? 'home' : 'landing')} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
           {centerLinks.map(link => {
