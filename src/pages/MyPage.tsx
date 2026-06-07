@@ -60,7 +60,6 @@ const MyPage: React.FC<MyPageProps> = ({ profile, companies, onNavigate, onIniti
   }
 
   const myCompanies = companies.filter(c => c.isManaged);
-  const today = new Date();
 
 
   const quickActions = [
