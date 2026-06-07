@@ -67,50 +67,50 @@ const Explore: React.FC<ExploreProps> = ({ onNavigate }) => {
   return (
     <div style={{ background: D.bg, minHeight: '100vh' }}>
       {/* Header */}
-      <div style={{ borderBottom: `1px solid ${D.border}`, padding: 'clamp(48px, 7vw, 80px) 20px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)', width: 500, height: 260, background: 'radial-gradient(ellipse, rgba(0,112,243,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          <h1 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800, color: D.heading, margin: '0 0 10px', letterSpacing: '-1.5px' }}>
+      <div style={{ borderBottom: `1px solid ${D.border}`, padding: '28px 20px' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <h1 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 800, color: D.heading, margin: '0 0 6px', letterSpacing: '-0.6px' }}>
             개발자 탐색
           </h1>
-          <p style={{ fontSize: tokens.fontSizes.sm, color: D.body, margin: '0 0 28px' }}>
+          <p style={{ fontSize: tokens.fontSizes.sm, color: D.body, margin: 0 }}>
             {exploreProfiles.length}명의 개발자와 연결하세요
           </p>
-          <div style={{ display: 'flex', gap: 8, maxWidth: 540, margin: '0 auto' }}>
-            <div style={{ flex: 1, display: 'flex', background: '#0f0f0f', borderRadius: 8, border: `1px solid ${D.border}`, overflow: 'hidden' }}>
-              <div style={{ padding: '0 14px', display: 'flex', alignItems: 'center' }}>
-                <SearchIcon size={16} color={D.muted} />
-              </div>
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="이름, 기술 스택, 직무 검색..."
-                style={{ flex: 1, border: 'none', outline: 'none', fontSize: tokens.fontSizes.sm, color: D.heading, padding: '13px 0', background: 'transparent', fontFamily: 'inherit' }}
-              />
-              {search && (
-                <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 12px', color: D.muted, fontSize: 16, fontFamily: 'inherit' }}>×</button>
-              )}
-            </div>
-            <button
-              onClick={() => setShowFilters(v => !v)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '0 14px', borderRadius: 8, cursor: 'pointer',
-                border: `1px solid ${showFilters || activeSkills.size > 0 ? 'rgba(0,112,243,0.4)' : D.border}`,
-                background: showFilters || activeSkills.size > 0 ? D.accentDim : '#0f0f0f',
-                color: showFilters || activeSkills.size > 0 ? '#5b9cf6' : D.muted,
-                fontSize: tokens.fontSizes.xs, fontWeight: 600, fontFamily: 'inherit',
-                transition: `all ${tokens.transitions.fast}`,
-              }}
-            >
-              <FilterIcon size={13} color={showFilters || activeSkills.size > 0 ? '#5b9cf6' : D.muted} />
-              필터 {activeSkills.size > 0 && `(${activeSkills.size})`}
-            </button>
-          </div>
         </div>
       </div>
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 20px 60px' }}>
+        {/* Search + filter */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+          <div style={{ flex: 1, display: 'flex', background: '#0f0f0f', borderRadius: 8, border: `1px solid ${D.border}`, overflow: 'hidden' }}>
+            <div style={{ padding: '0 14px', display: 'flex', alignItems: 'center' }}>
+              <SearchIcon size={16} color={D.muted} />
+            </div>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="이름, 기술 스택, 직무 검색..."
+              style={{ flex: 1, border: 'none', outline: 'none', fontSize: tokens.fontSizes.sm, color: D.heading, padding: '12px 0', background: 'transparent', fontFamily: 'inherit' }}
+            />
+            {search && (
+              <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 12px', color: D.muted, fontSize: 16, fontFamily: 'inherit' }}>×</button>
+            )}
+          </div>
+          <button
+            onClick={() => setShowFilters(v => !v)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '0 14px', borderRadius: 8, cursor: 'pointer',
+              border: `1px solid ${showFilters || activeSkills.size > 0 ? 'rgba(0,112,243,0.4)' : D.border}`,
+              background: showFilters || activeSkills.size > 0 ? D.accentDim : '#0f0f0f',
+              color: showFilters || activeSkills.size > 0 ? '#5b9cf6' : D.muted,
+              fontSize: tokens.fontSizes.xs, fontWeight: 600, fontFamily: 'inherit',
+              transition: `all ${tokens.transitions.fast}`,
+            }}
+          >
+            <FilterIcon size={13} color={showFilters || activeSkills.size > 0 ? '#5b9cf6' : D.muted} />
+            필터 {activeSkills.size > 0 && `(${activeSkills.size})`}
+          </button>
+        </div>
         {/* Filters panel */}
         {showFilters && (
           <div style={{ background: '#0a0a0a', borderRadius: 10, border: `1px solid ${D.border}`, padding: '16px 18px', marginBottom: 20 }}>

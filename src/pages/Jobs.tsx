@@ -57,18 +57,23 @@ const Jobs: React.FC = () => {
 
   return (
     <div style={{ background: D.bg, minHeight: '100vh' }}>
-      {/* Hero Header */}
-      <div style={{ borderBottom: `1px solid ${D.border}`, padding: 'clamp(40px, 6vw, 72px) 20px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)', width: 500, height: 260, background: 'radial-gradient(ellipse, rgba(0,112,243,0.09) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          <h1 style={{ fontSize: 'clamp(26px, 5vw, 46px)', fontWeight: 800, color: D.heading, margin: '0 0 10px', letterSpacing: '-1.5px' }}>
+      {/* Header */}
+      <div style={{ borderBottom: `1px solid ${D.border}`, padding: '28px 20px' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
+          <h1 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 800, color: D.heading, margin: '0 0 6px', letterSpacing: '-0.6px' }}>
             채용 공고
           </h1>
-          <p style={{ fontSize: tokens.fontSizes.sm, color: D.body, margin: '0 0 24px' }}>
-            {sampleJobs.length > 0 ? `${sampleJobs.length}개의 채용 공고` : '새로운 기회를 찾아보세요'}
+          <p style={{ fontSize: tokens.fontSizes.sm, color: D.body, margin: 0 }}>
+            {sampleJobs.length > 0 ? `${sampleJobs.length}개의 채용 공고가 있어요` : '새로운 기회를 찾아보세요'}
           </p>
-          {/* Search in hero */}
-          <div style={{ display: 'flex', background: '#0f0f0f', borderRadius: 10, border: `1px solid ${D.border}`, overflow: 'hidden', maxWidth: 480, margin: '0 auto' }}>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: selectedJob ? 1100 : 800, margin: '0 auto', padding: '24px 20px 60px', display: 'flex', gap: 20, transition: 'max-width 0.3s ease', alignItems: 'flex-start' }}>
+        {/* List */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Search */}
+          <div style={{ display: 'flex', background: '#0f0f0f', borderRadius: 8, border: `1px solid ${D.border}`, overflow: 'hidden', marginBottom: 16 }}>
             <div style={{ padding: '0 14px', display: 'flex', alignItems: 'center' }}>
               <SearchIcon size={16} color={D.muted} />
             </div>
@@ -76,7 +81,7 @@ const Jobs: React.FC = () => {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="직함, 회사, 기술 스택 검색..."
-              style={{ flex: 1, border: 'none', outline: 'none', fontSize: tokens.fontSizes.sm, color: D.heading, padding: '13px 0', background: 'transparent', fontFamily: 'inherit' }}
+              style={{ flex: 1, border: 'none', outline: 'none', fontSize: tokens.fontSizes.sm, color: D.heading, padding: '12px 0', background: 'transparent', fontFamily: 'inherit' }}
             />
             {search && (
               <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 14px', display: 'flex', alignItems: 'center' }}>
@@ -84,12 +89,6 @@ const Jobs: React.FC = () => {
               </button>
             )}
           </div>
-        </div>
-      </div>
-
-      <div style={{ maxWidth: selectedJob ? 1100 : 800, margin: '0 auto', padding: '24px 20px 60px', display: 'flex', gap: 20, transition: 'max-width 0.3s ease', alignItems: 'flex-start' }}>
-        {/* List */}
-        <div style={{ flex: 1, minWidth: 0 }}>
           {/* Type filter */}
           <div style={{ display: 'flex', gap: '6px', marginBottom: 20, flexWrap: 'wrap', background: '#0a0a0a', border: `1px solid ${D.border}`, borderRadius: 10, padding: 4, width: 'fit-content' }}>
             {TYPES.map(t => (
