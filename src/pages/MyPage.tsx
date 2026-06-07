@@ -76,10 +76,10 @@ const MyPage: React.FC<MyPageProps> = ({ profile, companies, onNavigate, onIniti
           <Avatar profile={profile} size={58} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={{ fontSize: tokens.fontSizes.xl, fontWeight: 800, color: D.heading, margin: '0 0 4px', letterSpacing: '-0.3px' }}>
-              {greeting}, {profile.name}님 👋
+              {profile.name}
             </h1>
             <p style={{ fontSize: tokens.fontSizes.sm, color: D.body, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {profile.headline || '오늘도 좋은 하루 되세요!'}
+              {profile.headline}
             </p>
           </div>
           <button
